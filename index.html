@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="/src/styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>シンプルメモ帳</title>
+    <script type="module" src="/src/main.ts" defer></script>
+  </head>
+
+  <body class="bg-white dark:bg-gray-900 overflow-hidden">
+    <!-- Web Demo Banner (hidden in Tauri) -->
+    <div id="web-demo-banner" class="bg-blue-500 text-white px-4 py-2 text-sm text-center">
+      📱 これは体験版です • ファイル保存はダウンロードになります • 
+      <a href="https://github.com/takuto-NA/simple-notepad/releases" class="underline font-semibold">完全版（デスクトップアプリ）をダウンロード</a>
+    </div>
+
+    <div id="app" class="h-screen flex flex-col">
+      <!-- Modern Toolbar -->
+      <nav class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-1">
+            <!-- File Operations -->
+            <button id="new-btn" class="toolbar-btn icon-new" title="新規 (Ctrl+N)"></button>
+            <button id="open-btn" class="toolbar-btn icon-open" title="開く (Ctrl+O)"></button>
+            <button id="save-btn" class="toolbar-btn icon-save" title="保存 (Ctrl+S)"></button>
+            <button id="save-as-btn" class="toolbar-btn icon-save-as" title="名前を付けて保存 (Ctrl+Shift+S)"></button>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Edit Operations -->
+            <button id="undo-btn" class="toolbar-btn icon-undo" title="元に戻す (Ctrl+Z)"></button>
+            <button id="redo-btn" class="toolbar-btn icon-redo" title="やり直し (Ctrl+Y)"></button>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Search Operations -->
+            <button id="find-btn" class="toolbar-btn icon-find" title="検索 (Ctrl+F)"></button>
+            <button id="replace-btn" class="toolbar-btn icon-replace" title="置換 (Ctrl+H)"></button>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- View Options -->
+            <button id="toggle-line-numbers" class="toolbar-btn icon-line-numbers" title="行番号表示切り替え"></button>
+            <button id="toggle-wrap" class="toolbar-btn icon-wrap" title="ワードラップ切り替え"></button>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Font Size -->
+            <div class="flex items-center space-x-2">
+              <span class="toolbar-btn icon-font-size" title="フォントサイズ"></span>
+              <select id="font-size" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <option value="12">12px</option>
+                <option value="14" selected>14px</option>
+                <option value="16">16px</option>
+                <option value="18">18px</option>
+                <option value="20">20px</option>
+                <option value="24">24px</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Right side controls -->
+          <div class="flex items-center space-x-1">
+            <!-- Encoding Selection -->
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-gray-600 dark:text-gray-400">文字コード:</span>
+              <select id="encoding-select" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <option value="UTF-8" selected>UTF-8</option>
+                <option value="Shift_JIS">Shift_JIS</option>
+                <option value="EUC-JP">EUC-JP</option>
+                <option value="ISO-2022-JP">ISO-2022-JP</option>
+              </select>
+            </div>
+            
+            <div class="toolbar-separator"></div>
+            
+            <!-- Dark Mode Toggle -->
+            <button id="dark-mode-toggle" class="toolbar-btn icon-theme" title="ダークモード切り替え (Ctrl+D)"></button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Search Bar (Hidden by default) -->
+      <div id="search-bar" class="search-bar border-b border-gray-200 dark:border-gray-700 px-4 py-3 hidden">
+        <div class="flex items-center space-x-3">
+          <div class="flex items-center space-x-2 flex-1">
+            <input id="search-input" type="text" placeholder="検索..." 
+                   class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <input id="replace-input" type="text" placeholder="置換..." 
+                   class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent hidden">
+          </div>
+          <div class="flex items-center space-x-2">
+            <button id="find-prev" class="px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">前へ</button>
+            <button id="find-next" class="px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">次へ</button>
+            <button id="replace-one" class="px-3 py-2 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors hidden">置換</button>
+            <button id="replace-all" class="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors hidden">全置換</button>
+            <button id="close-search" class="px-2 py-2 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">✕</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor Container -->
+      <div class="editor-container drop-area">
+        <!-- Line Numbers -->
+        <div id="line-numbers" class="line-numbers hidden"></div>
+        
+        <!-- Editor -->
+        <textarea
+          id="editor"
+          class="editor"
+          placeholder="ここにテキストを入力してください..."
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <!-- Status Bar -->
+      <div class="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2">
+        <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
+          <div class="flex items-center space-x-4">
+            <span id="status-text">準備完了</span>
+            <span id="file-info">新規ドキュメント</span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span id="cursor-position">行 1, 列 1</span>
+            <span id="selection-info"></span>
+            <span id="char-count">0 文字</span>
+            <span id="encoding">UTF-8</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Save As Dialog -->
+    <div id="save-as-dialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 max-w-90vw">
+        <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">名前を付けて保存</h3>
+        
+        <div class="space-y-4">
+          <!-- File Name -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">ファイル名</label>
+            <input id="save-filename" type="text" value="document.txt" 
+                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          </div>
+          
+          <!-- Encoding -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">文字コード</label>
+            <select id="save-encoding" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="UTF-8">UTF-8</option>
+              <option value="UTF-8-BOM">UTF-8 (BOM付き)</option>
+              <option value="Shift_JIS">Shift_JIS</option>
+              <option value="EUC-JP">EUC-JP</option>
+              <option value="ISO-2022-JP">ISO-2022-JP</option>
+            </select>
+          </div>
+          
+          <!-- Line Ending -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">改行コード</label>
+            <select id="save-line-ending" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="CRLF">CRLF (Windows)</option>
+              <option value="LF">LF (Unix/Mac)</option>
+              <option value="CR">CR (Classic Mac)</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="flex justify-end space-x-3 mt-6">
+          <button id="save-cancel" class="px-4 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            キャンセル
+          </button>
+          <button id="save-confirm" class="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">
+            保存
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden file input for opening files -->
+    <input type="file" id="file-input" accept=".txt,.md,.js,.ts,.json,.html,.css,.py,.c,.cpp,.java,.xml,.csv,.log" style="display: none;">
+  </body>
+</html>
