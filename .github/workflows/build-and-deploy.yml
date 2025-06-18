@@ -80,74 +80,60 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -la artifacts/
       
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          
+          # Windows files
+          if [ -d "artifacts/desktop-windows-latest" ]; then
+            find artifacts/desktop-windows-latest -name "*.msi" -o -name "*.exe" | while read file; do
+              cp "$file" release-files/
+            done
+          fi
+          
+          # macOS files  
+          if [ -d "artifacts/desktop-macos-latest" ]; then
+            find artifacts/desktop-macos-latest -name "*.dmg" -o -name "*.app.tar.gz" | while read file; do
+              cp "$file" release-files/
+            done
+          fi
+          
+          # Linux files
+          if [ -d "artifacts/desktop-ubuntu-22.04" ]; then
+            find artifacts/desktop-ubuntu-22.04 -name "*.deb" -o -name "*.AppImage" | while read file; do
+              cp "$file" release-files/
+            done
+          fi
+          
+          echo "Release files prepared:"
+          ls -la release-files/
+      
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: |
             🚀 シンプルメモ帳 ${{ github.ref_name }} をリリースしました
             
             ## 💾 ダウンロード
-            - **Windows**: `*-windows-*.msi` または `*-windows-*.exe`
-            - **macOS**: `*-macos-*.dmg` または `*-macos-*.app.tar.gz`  
-            - **Linux**: `*-ubuntu-*.deb` または `*-ubuntu-*.AppImage`
+            - **Windows**: `.msi` または `.exe` ファイル
+            - **macOS**: `.dmg` または `.app.tar.gz` ファイル  
+            - **Linux**: `.deb` または `.AppImage` ファイル
             
             ## 🌐 Web体験版
             [ブラウザで今すぐ試す](https://takuto-na.github.io/simple-notepad/)
             
             ## 📱 モバイル対応
             このバージョンではスマホ・タブレット対応が改善されました！
+            
+            ## 🛠️ インストール方法
+            1. お使いのOSに対応したファイルをダウンロード
+            2. ダウンロードしたファイルを実行してインストール
+            3. 「シンプルメモ帳」を起動して利用開始！
+          files: release-files/*
           draft: false
           prerelease: false
-      
-      - name: Upload Windows Assets
-        if: always()
-        run: |
-          if [ -d "artifacts/desktop-windows-latest" ]; then
-            find artifacts/desktop-windows-latest -name "*.msi" -o -name "*.exe" | while read file; do
-              echo "Uploading $file"
-              curl \
-                -X POST \
-                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Content-Type: application/octet-stream" \
-                --data-binary @"$file" \
-                "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
-            done
-          fi
-      
-      - name: Upload macOS Assets  
-        if: always()
-        run: |
-          if [ -d "artifacts/desktop-macos-latest" ]; then
-            find artifacts/desktop-macos-latest -name "*.dmg" -o -name "*.app.tar.gz" | while read file; do
-              echo "Uploading $file"
-              curl \
-                -X POST \
-                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Content-Type: application/octet-stream" \
-                --data-binary @"$file" \
-                "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
-            done
-          fi
-      
-      - name: Upload Linux Assets
-        if: always()
-        run: |
-          if [ -d "artifacts/desktop-ubuntu-22.04" ]; then
-            find artifacts/desktop-ubuntu-22.04 -name "*.deb" -o -name "*.AppImage" | while read file; do
-              echo "Uploading $file"
-              curl \
-                -X POST \
-                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-                -H "Content-Type: application/octet-stream" \
-                --data-binary @"$file" \
-                "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
-            done
-          fi
 
   # Web版デプロイ（GitHub Pages）
   deploy-web:
