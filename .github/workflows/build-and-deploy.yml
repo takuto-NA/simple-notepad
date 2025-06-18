@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  # デスクトップ版ビルド（Windows, macOS, Linux）
+  # デスクトップ版ビルド（タグpush または手動実行時のみ）
   build-desktop:
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
     strategy:
       matrix:
-        platform: [macos-latest, ubuntu-20.04, windows-latest]
+        platform: [macos-latest, ubuntu-22.04, windows-latest]
     runs-on: ${{ matrix.platform }}
     
     steps:
@@ -45,7 +45,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         
       - name: Install dependencies (ubuntu only)
-        if: matrix.platform == 'ubuntu-20.04'
+        if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev
@@ -137,8 +137,8 @@ jobs:
       - name: Upload Linux Assets
         if: always()
         run: |
-          if [ -d "artifacts/desktop-ubuntu-20.04" ]; then
-            find artifacts/desktop-ubuntu-20.04 -name "*.deb" -o -name "*.AppImage" | while read file; do
+          if [ -d "artifacts/desktop-ubuntu-22.04" ]; then
+            find artifacts/desktop-ubuntu-22.04 -name "*.deb" -o -name "*.AppImage" | while read file; do
               echo "Uploading $file"
               curl \
                 -X POST \
@@ -152,7 +152,8 @@ jobs:
   # Web版デプロイ（GitHub Pages）
   deploy-web:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    # mainブランチpush時のみ実行（タグpush時は除外）
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
       contents: read
       pages: write
