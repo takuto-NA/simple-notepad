@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "シンプルメモ帳",
+  "productName": "Simple Notepad",
   "version": "1.0.0",
   "identifier": "com.simple-notepad.app",
   "build": {
@@ -35,6 +35,11 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "wix": {
+        "language": ["en-US", "ja-JP"]
+      }
+    }
   }
 }
