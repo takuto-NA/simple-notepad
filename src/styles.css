@@ -454,3 +454,50 @@
   from { transform: translateY(20px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
+
+/* モバイルメニューのアニメーション */
+#mobile-menu {
+  transition: all 0.3s ease-in-out;
+  max-height: 0;
+  overflow: hidden;
+}
+
+#mobile-menu:not(.hidden) {
+  max-height: 500px;
+}
+
+/* モバイル向けツールバーボタンの調整 */
+@media (max-width: 768px) {
+  .toolbar-btn {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  
+  /* モバイルでのフォントサイズ調整 */
+  .editor {
+    font-size: 16px !important; /* iOS Safariでのズーム防止 */
+  }
+  
+  /* スクロールエリアの調整 */
+  .editor-container {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* タッチデバイス向けの調整 */
+@media (pointer: coarse) {
+  .toolbar-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* スクロールバーを非表示 */
+  .editor::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .line-numbers::-webkit-scrollbar {
+    display: none;
+  }
+}

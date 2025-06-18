@@ -19,7 +19,15 @@
       <!-- Modern Toolbar -->
       <nav class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-2">
         <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-1">
+          <!-- Mobile Menu Button -->
+          <button id="mobile-menu-btn" class="md:hidden toolbar-btn" title="メニュー">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          
+          <!-- Desktop Toolbar -->
+          <div class="hidden md:flex items-center space-x-1">
             <!-- File Operations -->
             <button id="new-btn" class="toolbar-btn icon-new" title="新規 (Ctrl+N)"></button>
             <button id="open-btn" class="toolbar-btn icon-open" title="開く (Ctrl+O)"></button>
@@ -62,8 +70,8 @@
           
           <!-- Right side controls -->
           <div class="flex items-center space-x-1">
-            <!-- Encoding Selection -->
-            <div class="flex items-center space-x-2">
+            <!-- Encoding Selection (hidden on mobile) -->
+            <div class="hidden lg:flex items-center space-x-2">
               <span class="text-xs text-gray-600 dark:text-gray-400">文字コード:</span>
               <select id="encoding-select" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
                 <option value="UTF-8" selected>UTF-8</option>
@@ -73,28 +81,107 @@
               </select>
             </div>
             
-            <div class="toolbar-separator"></div>
+            <div class="hidden lg:block toolbar-separator"></div>
             
             <!-- Dark Mode Toggle -->
             <button id="dark-mode-toggle" class="toolbar-btn icon-theme" title="ダークモード切り替え (Ctrl+D)"></button>
+          </div>
+        </div>
+        
+        <!-- Mobile Menu (Hidden by default) -->
+        <div id="mobile-menu" class="md:hidden hidden mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+          <div class="grid grid-cols-4 gap-2 mb-3">
+            <!-- Row 1: File Operations -->
+            <button id="new-btn-mobile" class="toolbar-btn icon-new flex flex-col items-center py-3" title="新規">
+              <div class="text-lg mb-1">📄</div>
+              <span class="text-xs">新規</span>
+            </button>
+            <button id="open-btn-mobile" class="toolbar-btn icon-open flex flex-col items-center py-3" title="開く">
+              <div class="text-lg mb-1">📁</div>
+              <span class="text-xs">開く</span>
+            </button>
+            <button id="save-btn-mobile" class="toolbar-btn icon-save flex flex-col items-center py-3" title="保存">
+              <div class="text-lg mb-1">💾</div>
+              <span class="text-xs">保存</span>
+            </button>
+            <button id="save-as-btn-mobile" class="toolbar-btn icon-save-as flex flex-col items-center py-3" title="名前を付けて保存">
+              <div class="text-lg mb-1">📝</div>
+              <span class="text-xs">名前付保存</span>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-4 gap-2 mb-3">
+            <!-- Row 2: Edit & Search -->
+            <button id="undo-btn-mobile" class="toolbar-btn icon-undo flex flex-col items-center py-3" title="元に戻す">
+              <div class="text-lg mb-1">↶</div>
+              <span class="text-xs">元に戻す</span>
+            </button>
+            <button id="redo-btn-mobile" class="toolbar-btn icon-redo flex flex-col items-center py-3" title="やり直し">
+              <div class="text-lg mb-1">↷</div>
+              <span class="text-xs">やり直し</span>
+            </button>
+            <button id="find-btn-mobile" class="toolbar-btn icon-find flex flex-col items-center py-3" title="検索">
+              <div class="text-lg mb-1">🔍</div>
+              <span class="text-xs">検索</span>
+            </button>
+            <button id="replace-btn-mobile" class="toolbar-btn icon-replace flex flex-col items-center py-3" title="置換">
+              <div class="text-lg mb-1">🔄</div>
+              <span class="text-xs">置換</span>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-2 mb-3">
+            <!-- Row 3: View Options -->
+            <button id="toggle-line-numbers-mobile" class="toolbar-btn icon-line-numbers flex items-center justify-center py-3" title="行番号表示切り替え">
+              <div class="text-lg mr-2">#</div>
+              <span class="text-xs">行番号</span>
+            </button>
+            <button id="toggle-wrap-mobile" class="toolbar-btn icon-wrap flex items-center justify-center py-3" title="ワードラップ切り替え">
+              <div class="text-lg mr-2">↩</div>
+              <span class="text-xs">ワードラップ</span>
+            </button>
+          </div>
+          
+          <div class="grid grid-cols-1 gap-2">
+            <!-- Row 4: Settings -->
+            <div class="flex items-center space-x-3 p-2 bg-gray-100 dark:bg-gray-700 rounded">
+              <label class="text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">フォント:</label>
+              <select id="font-size-mobile" class="flex-1 text-xs bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <option value="12">12px</option>
+                <option value="14" selected>14px</option>
+                <option value="16">16px</option>
+                <option value="18">18px</option>
+                <option value="20">20px</option>
+                <option value="24">24px</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-3 p-2 bg-gray-100 dark:bg-gray-700 rounded">
+              <label class="text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">文字コード:</label>
+              <select id="encoding-select-mobile" class="flex-1 text-xs bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <option value="UTF-8" selected>UTF-8</option>
+                <option value="Shift_JIS">Shift_JIS</option>
+                <option value="EUC-JP">EUC-JP</option>
+                <option value="ISO-2022-JP">ISO-2022-JP</option>
+              </select>
+            </div>
           </div>
         </div>
       </nav>
 
       <!-- Search Bar (Hidden by default) -->
       <div id="search-bar" class="search-bar border-b border-gray-200 dark:border-gray-700 px-4 py-3 hidden">
-        <div class="flex items-center space-x-3">
-          <div class="flex items-center space-x-2 flex-1">
+        <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-3">
+          <div class="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-2 flex-1 w-full">
             <input id="search-input" type="text" placeholder="検索..." 
-                   class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                   class="w-full md:flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <input id="replace-input" type="text" placeholder="置換..." 
-                   class="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent hidden">
+                   class="w-full md:flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent hidden">
           </div>
-          <div class="flex items-center space-x-2">
-            <button id="find-prev" class="px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">前へ</button>
-            <button id="find-next" class="px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">次へ</button>
-            <button id="replace-one" class="px-3 py-2 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors hidden">置換</button>
-            <button id="replace-all" class="px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors hidden">全置換</button>
+          <div class="flex items-center space-x-2 w-full md:w-auto">
+            <button id="find-prev" class="flex-1 md:flex-none px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">前へ</button>
+            <button id="find-next" class="flex-1 md:flex-none px-3 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">次へ</button>
+            <button id="replace-one" class="flex-1 md:flex-none px-3 py-2 text-sm bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors hidden">置換</button>
+            <button id="replace-all" class="flex-1 md:flex-none px-3 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors hidden">全置換</button>
             <button id="close-search" class="px-2 py-2 text-sm bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors">✕</button>
           </div>
         </div>
@@ -116,16 +203,16 @@
 
       <!-- Status Bar -->
       <div class="bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 px-4 py-2">
-        <div class="flex justify-between items-center text-xs text-gray-600 dark:text-gray-400">
-          <div class="flex items-center space-x-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center text-xs text-gray-600 dark:text-gray-400 space-y-1 md:space-y-0">
+          <div class="flex flex-col md:flex-row items-start md:items-center space-y-1 md:space-y-0 md:space-x-4">
             <span id="status-text">準備完了</span>
             <span id="file-info">新規ドキュメント</span>
           </div>
-          <div class="flex items-center space-x-4">
+          <div class="flex flex-wrap items-center gap-2 md:gap-4">
             <span id="cursor-position">行 1, 列 1</span>
             <span id="selection-info"></span>
             <span id="char-count">0 文字</span>
-            <span id="encoding">UTF-8</span>
+            <span id="encoding" class="hidden md:inline">UTF-8</span>
           </div>
         </div>
       </div>

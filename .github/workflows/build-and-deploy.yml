@@ -2,13 +2,15 @@ name: Build and Deploy
 on:
   push:
     branches: [main]
+    tags: ['v*']
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   # デスクトップ版ビルド（Windows, macOS, Linux）
   build-desktop:
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
     strategy:
       matrix:
         platform: [macos-latest, ubuntu-20.04, windows-latest]
@@ -59,6 +61,93 @@ jobs:
         with:
           name: desktop-${{ matrix.platform }}
           path: src-tauri/target/release/bundle/
+
+  # GitHub Release作成（タグpush時のみ）
+  create-release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build-desktop
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+      
+      - name: Display structure of downloaded files
+        run: ls -la artifacts/
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            🚀 シンプルメモ帳 ${{ github.ref_name }} をリリースしました
+            
+            ## 💾 ダウンロード
+            - **Windows**: `*-windows-*.msi` または `*-windows-*.exe`
+            - **macOS**: `*-macos-*.dmg` または `*-macos-*.app.tar.gz`  
+            - **Linux**: `*-ubuntu-*.deb` または `*-ubuntu-*.AppImage`
+            
+            ## 🌐 Web体験版
+            [ブラウザで今すぐ試す](https://takuto-na.github.io/simple-notepad/)
+            
+            ## 📱 モバイル対応
+            このバージョンではスマホ・タブレット対応が改善されました！
+          draft: false
+          prerelease: false
+      
+      - name: Upload Windows Assets
+        if: always()
+        run: |
+          if [ -d "artifacts/desktop-windows-latest" ]; then
+            find artifacts/desktop-windows-latest -name "*.msi" -o -name "*.exe" | while read file; do
+              echo "Uploading $file"
+              curl \
+                -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @"$file" \
+                "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
+            done
+          fi
+      
+      - name: Upload macOS Assets  
+        if: always()
+        run: |
+          if [ -d "artifacts/desktop-macos-latest" ]; then
+            find artifacts/desktop-macos-latest -name "*.dmg" -o -name "*.app.tar.gz" | while read file; do
+              echo "Uploading $file"
+              curl \
+                -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @"$file" \
+                "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
+            done
+          fi
+      
+      - name: Upload Linux Assets
+        if: always()
+        run: |
+          if [ -d "artifacts/desktop-ubuntu-20.04" ]; then
+            find artifacts/desktop-ubuntu-20.04 -name "*.deb" -o -name "*.AppImage" | while read file; do
+              echo "Uploading $file"
+              curl \
+                -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @"$file" \
+                "${{ steps.create_release.outputs.upload_url }}?name=$(basename "$file")"
+            done
+          fi
 
   # Web版デプロイ（GitHub Pages）
   deploy-web:

@@ -169,6 +169,25 @@ class SimpleNotepad {
     document.getElementById('toggle-wrap')!.addEventListener('click', () => this.toggleWordWrap());
     this.darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
 
+    // Mobile Menu Toggle
+    document.getElementById('mobile-menu-btn')!.addEventListener('click', () => this.toggleMobileMenu());
+
+    // Mobile Toolbar buttons
+    document.getElementById('new-btn-mobile')!.addEventListener('click', () => { this.newFile(); this.hideMobileMenu(); });
+    document.getElementById('open-btn-mobile')!.addEventListener('click', () => { this.openFile(); this.hideMobileMenu(); });
+    document.getElementById('save-btn-mobile')!.addEventListener('click', () => { this.saveFile(); this.hideMobileMenu(); });
+    document.getElementById('save-as-btn-mobile')!.addEventListener('click', () => { this.showSaveAsDialog(); this.hideMobileMenu(); });
+    document.getElementById('undo-btn-mobile')!.addEventListener('click', () => { this.undo(); this.hideMobileMenu(); });
+    document.getElementById('redo-btn-mobile')!.addEventListener('click', () => { this.redo(); this.hideMobileMenu(); });
+    document.getElementById('find-btn-mobile')!.addEventListener('click', () => { this.showSearch(false); this.hideMobileMenu(); });
+    document.getElementById('replace-btn-mobile')!.addEventListener('click', () => { this.showSearch(true); this.hideMobileMenu(); });
+    document.getElementById('toggle-line-numbers-mobile')!.addEventListener('click', () => { this.toggleLineNumbers(); this.hideMobileMenu(); });
+    document.getElementById('toggle-wrap-mobile')!.addEventListener('click', () => { this.toggleWordWrap(); this.hideMobileMenu(); });
+
+    // Mobile controls
+    document.getElementById('font-size-mobile')!.addEventListener('change', () => this.changeFontSizeMobile());
+    document.getElementById('encoding-select-mobile')!.addEventListener('change', () => this.changeEncodingMobile());
+
     // Search functionality
     document.getElementById('find-prev')!.addEventListener('click', () => this.findPrevious());
     document.getElementById('find-next')!.addEventListener('click', () => this.findNext());
@@ -246,8 +265,42 @@ class SimpleNotepad {
     this.statusText.textContent = this.state.darkMode ? 'ダークモードに切り替えました' : 'ライトモードに切り替えました';
   }
 
+  private toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+      mobileMenu.classList.toggle('hidden');
+    }
+  }
+
+  private hideMobileMenu() {
+    const mobileMenu = document.getElementById('mobile-menu');
+    if (mobileMenu) {
+      mobileMenu.classList.add('hidden');
+    }
+  }
+
+  private changeFontSizeMobile() {
+    const fontSizeMobile = document.getElementById('font-size-mobile') as HTMLSelectElement;
+    this.state.fontSize = parseInt(fontSizeMobile.value);
+    this.fontSizeSelect.value = fontSizeMobile.value; // Sync with desktop select
+    this.editor.style.fontSize = `${this.state.fontSize}px`;
+    this.updateLineNumbers();
+    this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に変更しました`;
+  }
+
+  private changeEncodingMobile() {
+    const encodingMobile = document.getElementById('encoding-select-mobile') as HTMLSelectElement;
+    this.state.encoding = encodingMobile.value;
+    this.encodingSelect.value = encodingMobile.value; // Sync with desktop select
+    this.updateDisplay();
+    this.statusText.textContent = `文字コードを ${this.state.encoding} に変更しました`;
+  }
+
   private changeEncoding() {
     this.state.encoding = this.encodingSelect.value;
+    // Sync mobile select
+    const encodingMobile = document.getElementById('encoding-select-mobile') as HTMLSelectElement;
+    if (encodingMobile) encodingMobile.value = this.encodingSelect.value;
     this.updateDisplay();
     this.statusText.textContent = `文字コードを ${this.state.encoding} に変更しました`;
   }
@@ -689,9 +742,13 @@ class SimpleNotepad {
 
   private changeFontSize() {
     this.state.fontSize = parseInt(this.fontSizeSelect.value);
+    // Sync mobile select
+    const fontSizeMobile = document.getElementById('font-size-mobile') as HTMLSelectElement;
+    if (fontSizeMobile) fontSizeMobile.value = this.fontSizeSelect.value;
     this.editor.style.fontSize = `${this.state.fontSize}px`;
     this.lineNumbers.style.fontSize = `${this.state.fontSize}px`;
     this.debounce('lineNumbers', () => this.updateLineNumbers(), 100);
+    this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に変更しました`;
   }
 
   private updateLineNumbers() {
