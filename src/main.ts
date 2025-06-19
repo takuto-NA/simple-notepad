@@ -1288,25 +1288,35 @@ class SimpleNotepad {
   private setupUpdateButton() {
     // ツールバーに「ヘルプ」ボタンを追加（更新チェックも含む）
     const toolbar = document.querySelector('.toolbar');
-    if (!toolbar || !IS_TAURI) return;
+    if (!toolbar) return;
 
     const helpButton = document.createElement('button');
     helpButton.className = 'bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-2 py-1 text-sm transition-colors';
     helpButton.innerHTML = '❓';
-    helpButton.title = 'ヘルプ・更新確認';
+    helpButton.title = IS_TAURI ? 'ヘルプ・更新確認' : 'このアプリについて';
     helpButton.onclick = () => this.showHelpMenu();
     
     toolbar.appendChild(helpButton);
   }
 
   private async showHelpMenu() {
-    if (!IS_TAURI) return;
-    
-    try {
-      const updater = await import('./updater');
-      await updater.checkUpdatesManually();
-    } catch (error) {
-      console.warn('更新チェックに失敗:', error);
+    if (IS_TAURI) {
+      // デスクトップ版: 更新チェック
+      try {
+        const updater = await import('./updater');
+        await updater.checkUpdatesManually();
+      } catch (error) {
+        console.warn('更新チェックに失敗:', error);
+      }
+    } else {
+      // Web版: アプリ情報表示
+      alert(
+        `🚀 シンプルメモ帳 v${document.querySelector('meta[name="version"]')?.getAttribute('content') || '1.0.0'}\n\n` +
+        `🌐 Web版体験中！\n` +
+        `📱 デスクトップ版もダウンロード可能\n\n` +
+        `🔗 GitHub: https://github.com/takuto-NA/simple-notepad\n` +
+        `💾 リリース: https://github.com/takuto-NA/simple-notepad/releases`
+      );
     }
   }
 }

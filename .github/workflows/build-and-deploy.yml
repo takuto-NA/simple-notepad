@@ -298,9 +298,13 @@ jobs:
               },
               "linux-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_amd64-x64.AppImage"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_amd64.AppImage"
               },
               "darwin-x86_64": {
+                "signature": "",
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_x64.dmg"
+              },
+              "darwin-aarch64": {
                 "signature": "",
                 "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_aarch64.dmg"
               }
