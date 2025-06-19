@@ -1,126 +1,148 @@
-# シンプルメモ帳
+# Simple Notepad
 
-Tauri + TypeScript + Tailwind CSSで作成された真にシンプルなメモ帳アプリです。
+A truly simple notepad application built with Tauri + TypeScript + Tailwind CSS.
 
-## 📱 体験版をお試し
+## 📱 Try the Demo
 
-**[Web体験版を今すぐ試す](https://takuto-na.github.io/simple-notepad/)** （ブラウザで即座に利用可能）
+**[Try the Web Demo Now](https://takuto-na.github.io/simple-notepad/)** (Available instantly in your browser)
 
-- ✅ テキスト編集の全機能を体験
-- ⚠️ ファイル保存は「ダウンロード」として動作
-- 📥 気に入ったらデスクトップ版をダウンロード
+- ✅ Experience all text editing features
+- ⚠️ File saving works as "download" functionality
+- 📥 Download the desktop version if you like it
 
-## 設計理念
+## 🌐 Internationalization Support
 
-- **単一性**: １つのウィンドウに１つのメモのみ
-- **最小限UI**: 書く領域を最大化し、UIは最小限に
-- **実用性重視**: 装飾より実用的な機能を優先
+- **Automatic Language Detection**: Detects your browser language automatically
+- **Languages Supported**: 
+  - 🇺🇸 English (en)
+  - 🇯🇵 Japanese (ja)
+- **Manual Override**: Switch languages manually using the language selector
+- **Extensible Architecture**: Easy to add new languages
+- **Fallback System**: Graceful fallback to English for missing translations
 
-## 機能
+Want to contribute translations? See [CONTRIBUTING_I18N.md](CONTRIBUTING_I18N.md) for detailed instructions.
 
-### ✅ ファイル操作
-- 新規作成（Ctrl+N）
-- ファイルを開く（Ctrl+O）
-- 保存（Ctrl+S）
-- 名前を付けて保存（Ctrl+Shift+S）
-- ドラッグ&ドロップでファイル読み込み
+## Design Philosophy
 
-### ✅ 編集機能
-- 元に戻す/やり直し（Ctrl+Z、Ctrl+Y）
-- タブ挿入とShift+Tabでのタブ削除
-- 文字検索（Ctrl+F）
-- 文字置換（Ctrl+H）
+- **Singularity**: One window, one memo only
+- **Minimal UI**: Maximize writing area, minimize UI elements
+- **Practical Focus**: Prioritize practical functionality over decoration
 
-### ✅ 表示機能
-- 行番号表示の切り替え
-- 文字サイズ変更（12px-20px）
-- ワードラップの切り替え
-- 詳細なステータスバー（行/列位置、文字数、文字コード）
+## Features
 
-### ✅ ユーザビリティ
-- 手動ダークモード切り替え（Ctrl+D）
-- 豊富なキーボードショートカット
-- 未保存変更の保護
-- 文字コード・改行コード選択
+### ✅ File Operations
+- New file (Ctrl+N)
+- Open file (Ctrl+O)
+- Save (Ctrl+S)
+- Save As (Ctrl+Shift+S)
+- Drag & drop file loading
 
-### 📱 モバイル対応（新機能！）
-- **レスポンシブUI**: スマホ・タブレットに最適化されたインターフェース
-- **ハンバーガーメニュー**: 小画面でも全機能にアクセス可能
-- **タッチ操作**: 指での操作に最適化されたボタンサイズ
-- **モバイル専用設定**: フォントサイズと文字コードをモバイルで簡単変更
+### ✅ Editing Features
+- Undo/Redo (Ctrl+Z, Ctrl+Y)
+- Tab insertion and Shift+Tab for tab removal
+- Text search (Ctrl+F)
+- Text replace (Ctrl+H)
 
-## キーボードショートカット
+### ✅ Display Features
+- Toggle line numbers
+- Font size adjustment (12px-20px)
+- Word wrap toggle
+- Detailed status bar (line/column position, character count, encoding)
 
-| 機能 | ショートカット |
-|------|-------------|
-| 新規作成 | `Ctrl+N` |
-| ファイルを開く | `Ctrl+O` |
-| 保存 | `Ctrl+S` |
-| 名前を付けて保存 | `Ctrl+Shift+S` |
-| 元に戻す | `Ctrl+Z` |
-| やり直し | `Ctrl+Y` |
-| 検索 | `Ctrl+F` |
-| 置換 | `Ctrl+H` |
-| ダークモード切り替え | `Ctrl+D` |
-| 検索バーを閉じる | `Escape` |
+### ✅ Usability
+- Manual dark mode toggle (Ctrl+D)
+- Rich keyboard shortcuts
+- Unsaved changes protection
+- Character encoding & line ending selection
 
-## 除外した機能
+### 📱 Mobile Support (New Feature!)
+- **Responsive UI**: Interface optimized for smartphones and tablets
+- **Hamburger Menu**: Access all features on small screens
+- **Touch Optimization**: Button sizes optimized for finger operation
+- **Mobile-Specific Settings**: Easy font size and encoding changes on mobile
 
-- ❌ 複数メモの管理機能
-- ❌ タブ機能  
-- ❌ 自動保存
-- ❌ クラウド同期
-- ❌ リッチテキスト編集
+### 🌐 Internationalization (New Feature!)
+- **Multi-language Support**: Japanese and English with automatic detection
+- **Language Switching**: Manual language override with persistent preferences
+- **Extensible Translation System**: Easy addition of new languages
+- **Translation Validation**: Automated quality assurance for translations
 
-## 開発環境のセットアップ
+## Keyboard Shortcuts
 
-### 🖥️ PC/Mac環境
+| Feature | Shortcut |
+|---------|----------|
+| New file | `Ctrl+N` |
+| Open file | `Ctrl+O` |
+| Save | `Ctrl+S` |
+| Save As | `Ctrl+Shift+S` |
+| Undo | `Ctrl+Z` |
+| Redo | `Ctrl+Y` |
+| Find | `Ctrl+F` |
+| Replace | `Ctrl+H` |
+| Toggle dark mode | `Ctrl+D` |
+| Close search bar | `Escape` |
 
-#### 必要な環境
+## Excluded Features
 
-- Node.js (18.0以上)
-- Rust (最新版)
+- ❌ Multiple memo management
+- ❌ Tab functionality
+- ❌ Auto-save
+- ❌ Cloud synchronization
+- ❌ Rich text editing
+
+## Development Environment Setup
+
+### 🖥️ PC/Mac Environment
+
+#### Prerequisites
+
+- Node.js (18.0 or higher)
+- Rust (latest version)
 - pnpm
 
-#### インストール方法
+#### Installation
 
 ```bash
-# 依存関係のインストール
+# Install dependencies
 pnpm install
 
-# 🌐 Web版開発（体験版）
-pnpm dev                # Web版開発サーバー
-pnpm build:web          # Web版ビルド
-pnpm preview:web        # Web版プレビュー
+# 🌐 Web version development (demo)
+pnpm dev                # Web development server
+pnpm build:web          # Web build
+pnpm preview:web        # Web preview
 
-# 🖥️ デスクトップ版開発
-pnpm dev:tauri          # Tauriアプリ開発
-pnpm build:tauri        # デスクトップアプリビルド
+# 🖥️ Desktop version development
+pnpm dev:tauri          # Tauri app development
+pnpm build:tauri        # Desktop app build
+
+# 🌐 Translation validation
+pnpm validate-translations        # Validate all translations
+pnpm validate-translation ja      # Validate specific language
 ```
 
-### 🍓 Raspberry Pi環境
+### 🍓 Raspberry Pi Environment
 
-#### システム要件
+#### System Requirements
 
-- **推奨**: Raspberry Pi 4 (4GB RAM以上)
-- **OS**: Raspberry Pi OS Bullseye以降
-- **ストレージ**: 2GB以上の空き容量
+- **Recommended**: Raspberry Pi 4 (4GB RAM or more)
+- **OS**: Raspberry Pi OS Bullseye or later
+- **Storage**: 2GB+ free space
 
-#### セットアップ手順
+#### Setup Instructions
 
 ```bash
-# 1. システムアップデート
+# 1. System update
 sudo apt update && sudo apt upgrade -y
 
-# 2. Node.js 18のインストール
+# 2. Install Node.js 18
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# 3. Rustのインストール
+# 3. Install Rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source ~/.cargo/env
 
-# 4. 必要な依存関係のインストール
+# 4. Install required dependencies
 sudo apt install -y libwebkit2gtk-4.0-dev \
     build-essential \
     curl \
@@ -130,174 +152,117 @@ sudo apt install -y libwebkit2gtk-4.0-dev \
     libayatana-appindicator3-dev \
     librsvg2-dev
 
-# 5. pnpmのインストール
+# 5. Install pnpm
 npm install -g pnpm
 
-# 6. プロジェクトの準備
+# 6. Prepare project
 cd scripts/GUI/tauri/memo
 pnpm install
 
-# 7. ラズパイ用設定（メモリ使用量削減）
+# 7. Raspberry Pi optimization (reduce memory usage)
 export NODE_OPTIONS="--max_old_space_size=1024"
 
-# 8. 開発サーバー起動（軽量モード）
+# 8. Start development server (lightweight mode)
 pnpm tauri dev
 
-# 9. 本番ビルド（時間がかかります）
+# 9. Production build (takes time)
 pnpm tauri build --target armv7-unknown-linux-gnueabihf
 ```
 
-#### ラズパイ向け最適化設定
+#### Raspberry Pi Optimization Settings
 
 ```bash
-# メモリ最適化のため、以下を ~/.bashrc に追加
+# Add to ~/.bashrc for memory optimization
 echo 'export NODE_OPTIONS="--max_old_space_size=1024"' >> ~/.bashrc
-echo 'export CARGO_BUILD_JOBS=1' >> ~/.bashrc  # シングルコアビルド
+echo 'export CARGO_BUILD_JOBS=1' >> ~/.bashrc  # Single-core build
 source ~/.bashrc
 ```
 
-#### パフォーマンス改善Tips
+#### Performance Improvement Tips
 
-1. **SSD使用**: microSDより高速なUSB SSDを使用
-2. **冷却**: 長時間作業時はファンを推奨
-3. **メモリ**: 4GB以上のモデルを推奨
-4. **軽量ブラウザ**: Chromiumより軽量なブラウザエンジン使用
+1. **Use SSD**: USB SSD instead of microSD for better performance
+2. **Cooling**: Fan recommended for extended work sessions
+3. **Memory**: 4GB+ models recommended
+4. **Lightweight Browser**: Use lighter browser engine than Chromium
 
-## 技術スタック
+## Contributing Translations
 
-- **フロントエンド**: TypeScript, HTML, CSS
-- **UIフレームワーク**: Tailwind CSS
-- **デスクトップフレームワーク**: Tauri
-- **バックエンド**: Rust
-- **データ保存**: 明示的ファイル保存のみ
+We welcome translation contributions! The process is designed to be simple and accessible:
 
-## プラットフォーム対応
+1. **Copy the template**: Start with `src/i18n/locales/_template.ts`
+2. **Translate**: Replace English text with your language
+3. **Validate**: Run `pnpm validate-translation [your-language-code]`
+4. **Submit**: Create a pull request
 
-| プラットフォーム | 対応状況 | 備考 |
-|-----------------|----------|------|
-| Windows | ✅ 完全対応 | |
-| macOS | ✅ 完全対応 | |
-| Linux (x64) | ✅ 完全対応 | |
-| **Raspberry Pi** | ✅ 対応 | Pi 3以降推奨 |
-| ARM64 Linux | ✅ 対応 | |
+For detailed instructions, see [CONTRIBUTING_I18N.md](CONTRIBUTING_I18N.md).
 
-## ファイル構成
+## Technology Stack
+
+- **Frontend**: TypeScript, HTML, CSS
+- **UI Framework**: Tailwind CSS
+- **Desktop Framework**: Tauri
+- **Backend**: Rust
+- **Internationalization**: Custom modular i18n system
+- **Data Storage**: Explicit file saving only
+
+## Platform Support
+
+| Platform | Status | Notes |
+|----------|--------|-------|
+| Windows | ✅ Full support | |
+| macOS | ✅ Full support | |
+| Linux (x64) | ✅ Full support | |
+| **Raspberry Pi** | ✅ Supported | Pi 3+ recommended |
+| ARM64 Linux | ✅ Supported | |
+
+## File Structure
 
 ```
 ├── src/
-│   ├── main.ts          # メインのTypeScriptファイル
-│   └── styles.css       # Tailwind CSS + カスタムスタイル
-├── index.html           # メインHTMLファイル
-├── src-tauri/           # Tauriのバックエンド（Rust）
-├── package.json         # Node.jsの依存関係
-├── tailwind.config.js   # Tailwind CSSの設定
-└── .gitignore          # Git無視ファイル設定
+│   ├── main.ts          # Main TypeScript file
+│   ├── styles.css       # Tailwind CSS + custom styles
+│   └── i18n/           # Internationalization system
+│       ├── languages.ts      # Language registry
+│       └── locales/          # Translation files
+│           ├── _template.ts  # Template for new languages
+│           ├── en.ts         # English translations
+│           └── ja.ts         # Japanese translations
+├── scripts/
+│   └── validate-translations.js  # Translation validation tool
+├── index.html           # Main HTML file
+├── src-tauri/          # Tauri backend (Rust)
+├── package.json        # Node.js dependencies
+├── tailwind.config.js  # Tailwind CSS configuration
+├── CONTRIBUTING_I18N.md # Translation contribution guide
+└── .gitignore          # Git ignore file settings
 ```
 
-## データの保存について
+## Data Storage Policy
 
-- **基本方針**: 明示的な保存のみ（自動保存なし）
-- **緊急時**: アプリクラッシュ時のみ一時保存
-- **起動時**: 空の新規ドキュメントで開始
-- **終了時**: 未保存の変更があれば確認ダイアログ
+- **Basic Principle**: Explicit saving only (no auto-save)
+- **Emergency Only**: Temporary save only during app crashes
 
-## 自動ビルドとデプロイ
+## npm Scripts
 
-### 🚀 GitHub Actions による自動化
+| Script | Description |
+|--------|-------------|
+| `pnpm dev` | Start web development server |
+| `pnpm dev:tauri` | Start Tauri development |
+| `pnpm build:web` | Build web version |
+| `pnpm build:tauri` | Build desktop version |
+| `pnpm validate-translations` | Validate all translations |
+| `pnpm validate-translation [lang]` | Validate specific language |
 
-```bash
-# mainブランチにpushすると自動実行
-git push origin main
+## License
 
-# → Web版が GitHub Pages に自動デプロイ
-# → https://takuto-na.github.io/simple-notepad/
+This project is open source. Feel free to use, modify, and distribute according to the license terms.
 
-# リリースタグをpushすると自動実行  
-git tag v1.0.0
-git push origin v1.0.0
+## Feedback & Contributions
 
-# → デスクトップ版が3プラットフォーム分ビルド
-# → GitHub Releases にアップロード
-```
+We welcome feedback and contributions! Whether you want to:
+- Report bugs or suggest features
+- Add translations for new languages
+- Improve the codebase
+- Enhance documentation
 
-### 🛠️ 手動ビルド
-
-```bash
-# Web版（体験版）
-pnpm build:web          # → dist-web/ に生成
-
-# デスクトップ版
-pnpm build:tauri        # → src-tauri/target/release/bundle/ に生成
-```
-
-### 🏷️ リリース作成手順
-
-#### 方法1: リリースタグ作成（推奨）
-```bash
-# 1. バージョンアップ
-git add .
-git commit -m "v1.1.0: モバイル対応とバグ修正"
-
-# 2. リリースタグ作成
-git tag v1.1.0
-git push origin v1.1.0
-
-# → 自動的に3プラットフォーム版がビルドされ、GitHub Releasesに公開
-```
-
-#### 方法2: 手動実行
-```bash
-# 1. GitHubのActionsタブに移動
-# 2. "Build and Deploy" ワークフローを選択  
-# 3. "Run workflow" ボタンをクリック
-# 4. mainブランチを選択して実行
-
-# → デスクトップ版がビルドされ、Artifactsとしてダウンロード可能
-```
-
-#### 方法3: コミットメッセージ指定
-```bash
-# [release]を含むコミットメッセージでpush
-git commit -m "[release] v1.1.0: 新機能追加"
-git push origin main
-
-# → 自動的にデスクトップ版ビルドが実行される
-```
-
-### Raspberry Pi
-
-```bash
-# ARM64向けビルド（Pi 4推奨）
-pnpm tauri build --target aarch64-unknown-linux-gnu
-
-# ARM32向けビルド（Pi 3対応）
-pnpm tauri build --target armv7-unknown-linux-gnueabihf
-```
-
-ビルドされたアプリケーションは `src-tauri/target/release/bundle/` に生成されます。
-
-## トラブルシューティング
-
-### Raspberry Pi での問題
-
-**メモリ不足エラー:**
-```bash
-export NODE_OPTIONS="--max_old_space_size=1024"
-export CARGO_BUILD_JOBS=1
-```
-
-**WebView起動エラー:**
-```bash
-sudo apt install gstreamer1.0-plugins-bad-videoparsers
-```
-
-**ビルド時間の短縮:**
-- SSDの使用
-- `CARGO_BUILD_JOBS=1` でシングルコアビルド
-
-## UI設計原則
-
-- **最大編集領域**: 画面の90%以上をテキスト編集に使用
-- **非侵入的メニュー**: 必要時のみ表示されるコンパクトなメニュー
-- **キーボード優先**: 全機能をキーボードで操作可能
-- **視覚的静寂**: 不要な色、アニメーション、装飾の排除
+Please feel free to open an issue or submit a pull request.
