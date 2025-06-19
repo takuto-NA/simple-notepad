@@ -7,8 +7,8 @@ const IS_TAURI = typeof window !== 'undefined' &&
                  !__IS_WEB_BUILD__;
 
 // Import i18n system
-import { availableLanguages, translations, getLanguageInfo, isLanguageSupported, getFallbackChain } from './i18n/languages';
-import type { LanguageInfo, TranslationData } from './i18n/languages';
+import { availableLanguages, translations, isLanguageSupported, getFallbackChain } from './i18n/languages';
+import type { LanguageInfo } from './i18n/languages';
 
 class I18n {
   private currentLanguage: string = 'en'; // Default fallback
