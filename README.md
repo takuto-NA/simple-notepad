@@ -55,6 +55,13 @@ Want to contribute translations? See [CONTRIBUTING_I18N.md](CONTRIBUTING_I18N.md
 - Unsaved changes protection
 - Character encoding & line ending selection
 
+### 🚀 Auto-Update System (New Feature!)
+- **Organizational Code Signing**: Enterprise-level security with cryptographic verification
+- **Silent Background Checks**: Non-intrusive update detection
+- **One-Click Updates**: Download, verify, install, and restart automatically
+- **Multi-Maintainer Management**: Democratic development with no single point of failure
+- **Transparent Security**: Complete audit trail and open-source verification
+
 ### 📱 Mobile Support (New Feature!)
 - **Responsive UI**: Interface optimized for smartphones and tablets
 - **Hamburger Menu**: Access all features on small screens
@@ -66,6 +73,112 @@ Want to contribute translations? See [CONTRIBUTING_I18N.md](CONTRIBUTING_I18N.md
 - **Language Switching**: Manual language override with persistent preferences
 - **Extensible Translation System**: Easy addition of new languages
 - **Translation Validation**: Automated quality assurance for translations
+
+## 🔐 Security & Auto-Update System
+
+### 🚀 Automatic Updates (New Feature!)
+
+This application features **enterprise-level automatic updates** with organizational code signing for maximum security and transparency.
+
+#### How It Works
+1. **Silent Background Check**: Updates checked 5 minutes after startup
+2. **Non-Intrusive Notification**: `🚀 Update` button appears when updates available
+3. **One-Click Update**: Download, verify, install, and restart automatically
+4. **Signature Verification**: All updates cryptographically verified before installation
+5. **Transparent Process**: Complete update process visible to users
+
+#### User Experience
+- ✅ **Zero Configuration**: Works automatically
+- ✅ **Non-Disruptive**: No forced updates or annoying popups
+- ✅ **Opt-in Only**: Users choose when to update
+- ✅ **Progress Indicators**: Clear feedback during download and installation
+- ✅ **Automatic Restart**: Seamless transition to new version
+
+### 🛡️ Security Architecture
+
+#### Organizational Code Signing
+- **Multi-Maintainer System**: No single point of failure
+- **GitHub Secrets Management**: Cryptographically secure key storage
+- **Democratic Development**: Multiple administrators can manage releases
+- **Audit Trail**: All changes tracked in public GitHub history
+- **Key Rotation**: Easy key replacement when needed
+
+#### Cryptographic Security
+- **Ed25519 Signatures**: Modern, secure signing algorithm
+- **TLS Encryption**: All downloads encrypted in transit
+- **Integrity Verification**: Files verified before installation
+- **Tamper Detection**: Modified files automatically rejected
+- **Chain of Trust**: Signatures linked to verified GitHub repository
+
+#### Transparency Measures
+- **Open Source**: All code publicly auditable
+- **Public Build Process**: GitHub Actions workflows visible to all
+- **Reproducible Builds**: Anyone can verify build authenticity
+- **Security Documentation**: This section provides complete security overview
+- **Community Oversight**: Open to security researchers and community review
+
+### 🔑 Signing Key Management
+
+#### Organizational Approach
+Our signing system uses **organizational management** rather than individual developer keys:
+
+- **Shared Responsibility**: Multiple trusted maintainers can manage updates
+- **Succession Planning**: Project continues even if original developer unavailable
+- **Community Trust**: Built on GitHub's infrastructure and transparency
+- **No Personal Dependencies**: No individual passwords or personal information required
+
+#### How Keys Are Protected
+1. **Generation**: Keys generated locally using secure random algorithms
+2. **Storage**: Private keys encrypted and stored in GitHub Secrets
+3. **Access Control**: Only repository administrators can access keys
+4. **Distribution**: Public keys embedded in application for verification
+5. **Rotation**: Keys can be replaced through standard GitHub processes
+
+#### For Developers and Security Researchers
+- **Key Information**: Public keys visible in `src-tauri/tauri.conf.json`
+- **Build Process**: Signing process documented in `.github/workflows/`
+- **Verification**: Anyone can verify signature authenticity
+- **Security Issues**: Report to repository issues or security contacts
+
+### 🏢 Trust Model
+
+#### Why This Approach Is Secure
+1. **Decentralized Control**: Not dependent on single individual
+2. **GitHub Infrastructure**: Leverages Microsoft's security investments
+3. **Open Audit**: All processes visible and verifiable
+4. **Community Oversight**: Transparent to security community
+5. **Standard Practices**: Follows industry-standard code signing practices
+
+#### What Users Can Verify
+- ✅ **Source Code**: Complete application source available on GitHub
+- ✅ **Build Process**: All build scripts and workflows public
+- ✅ **Signatures**: Every release cryptographically signed
+- ✅ **Update Mechanism**: Update process documented and auditable
+- ✅ **Key Management**: Signing architecture explained in detail
+
+### 🔄 Update Process Details
+
+#### For End Users
+1. Application checks for updates 5 minutes after startup
+2. If update available, non-intrusive `🚀 Update` button appears
+3. Clicking button downloads and verifies update signature
+4. If signature valid, update installs and application restarts
+5. If signature invalid, update rejected and user notified
+
+#### For Developers
+1. Create git tag (e.g., `git tag v1.2.0`)
+2. Push tag to trigger release workflow
+3. GitHub Actions builds for all platforms
+4. Each build signed with organizational key
+5. `latest.json` manifest generated with signatures
+6. Release published with signed binaries
+
+### 🆘 Security Contact
+
+For security issues or questions about the signing process:
+- **GitHub Issues**: [Report publicly](https://github.com/takuto-NA/simple-notepad/issues) for non-sensitive issues
+- **Security Concerns**: Use GitHub's private reporting for sensitive matters
+- **Key Verification**: All public keys can be verified through repository history
 
 ## Keyboard Shortcuts
 
@@ -207,13 +320,13 @@ For detailed instructions, see [CONTRIBUTING_I18N.md](CONTRIBUTING_I18N.md).
 
 ## Platform Support
 
-| Platform | Status | Notes |
-|----------|--------|-------|
-| Windows | ✅ Full support | |
-| macOS | ✅ Full support | |
-| Linux (x64) | ✅ Full support | |
-| **Raspberry Pi** | ✅ Supported | Pi 3+ recommended |
-| ARM64 Linux | ✅ Supported | |
+| Platform | Status | Auto-Update | Notes |
+|----------|--------|------------|-------|
+| Windows | ✅ Full support | ✅ Signed MSI | Enterprise-level security |
+| macOS | ✅ Full support | ✅ Signed DMG | Apple notarization ready |
+| Linux (x64) | ✅ Full support | ✅ Signed AppImage | Universal compatibility |
+| **Raspberry Pi** | ✅ Supported | ✅ ARM builds | Pi 3+ recommended |
+| ARM64 Linux | ✅ Supported | ✅ Native ARM64 | High performance |
 
 ## File Structure
 

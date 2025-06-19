@@ -41,5 +41,13 @@
         "language": ["en-US", "ja-JP", "zh-CN", "fr-FR", "de-DE", "es-ES", "ko-KR"]
       }
     }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": [
+        "https://github.com/takuto-NA/simple-notepad/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlFRjAwQUIwQUFFQjE3MzcKUldRM0YrdXFzQXJ3bnR2cVRUWGRuTitBaHZmR29nc3k3RDcybnNNU2NPdGEzZnJSbGxQcVIvTG4K"
+    }
   }
 }

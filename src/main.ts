@@ -10,10 +10,10 @@ const IS_TAURI = typeof window !== 'undefined' &&
 import { availableLanguages, translations, isLanguageSupported, getFallbackChain } from './i18n/languages';
 import type { LanguageInfo } from './i18n/languages';
 
-// Import auto-update functionality
-import { check } from '@tauri-apps/plugin-updater';
-import { ask, message } from '@tauri-apps/plugin-dialog';
-import { relaunch } from '@tauri-apps/api/process';
+// Import auto-update functionality (Tauri版のみ)
+if (IS_TAURI) {
+  // Tauri環境でのみインポート（動的インポートに変更）
+}
 
 class I18n {
   private currentLanguage: string = 'en'; // Default fallback
@@ -157,6 +157,8 @@ class SimpleNotepad {
     this.updateToolbarState();
     this.focusEditor(); // すぐに作業開始できるようフォーカス
     this.showEnvironmentInfo(); // 環境情報を表示
+    this.initializeUpdateChecker(); // 非侵入的な更新チェッカーを初期化
+    this.setupUpdateButton(); // ツールバーに「ヘルプ」ボタンを追加（更新チェックも含む）
   }
 
   private getSystemDarkMode(): boolean {
@@ -258,7 +260,7 @@ class SimpleNotepad {
       { id: 'toggle-wrap', key: 'toolbar.wordWrap' },
       { id: 'dark-mode-toggle', key: 'toolbar.darkMode' }
     ];
-
+    
     tooltipElements.forEach(({ id, key }) => {
       const element = document.getElementById(id);
       if (element) {
@@ -266,7 +268,7 @@ class SimpleNotepad {
       }
     });
   }
-
+    
   private updateMobileMenuLabels() {
     const mobileLabels = [
       { id: 'new-btn-mobile', key: 'mobile.new' },
@@ -280,7 +282,7 @@ class SimpleNotepad {
       { id: 'toggle-line-numbers-mobile', key: 'mobile.lineNumbers' },
       { id: 'toggle-wrap-mobile', key: 'mobile.wordWrap' }
     ];
-
+    
     mobileLabels.forEach(({ id, key }) => {
       const element = document.getElementById(id);
       if (element) {
@@ -291,7 +293,7 @@ class SimpleNotepad {
         element.title = i18n.t(key);
       }
     });
-
+    
     // Update mobile settings labels
     const fontLabel = document.querySelector('[for="font-size-mobile"], label:has(+ #font-size-mobile)');
     if (fontLabel) {
@@ -319,14 +321,14 @@ class SimpleNotepad {
     if (replaceInput) {
       replaceInput.placeholder = i18n.t('search.replacePlaceholder');
     }
-
+    
     const buttons = [
       { id: 'find-prev', key: 'search.previous' },
       { id: 'find-next', key: 'search.next' },
       { id: 'replace-one', key: 'search.replace' },
       { id: 'replace-all', key: 'search.replaceAll' }
     ];
-
+    
     buttons.forEach(({ id, key }) => {
       const element = document.getElementById(id);
       if (element) {
@@ -1270,6 +1272,42 @@ class SimpleNotepad {
       this.statusText.textContent = `${i18n.t('status.fileOpened')}: "${file.name}" (${this.state.encoding})`;
     };
     reader.readAsText(file, this.state.encoding);
+  }
+
+  private initializeUpdateChecker() {
+    // 動的インポートでTauri環境でのみ更新機能を読み込み
+    if (IS_TAURI) {
+      import('./updater').then(updater => {
+        updater.initializeUpdateChecker();
+      }).catch(error => {
+        console.warn('更新チェッカーの初期化に失敗:', error);
+      });
+    }
+  }
+
+  private setupUpdateButton() {
+    // ツールバーに「ヘルプ」ボタンを追加（更新チェックも含む）
+    const toolbar = document.querySelector('.toolbar');
+    if (!toolbar || !IS_TAURI) return;
+
+    const helpButton = document.createElement('button');
+    helpButton.className = 'bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-2 py-1 text-sm transition-colors';
+    helpButton.innerHTML = '❓';
+    helpButton.title = 'ヘルプ・更新確認';
+    helpButton.onclick = () => this.showHelpMenu();
+    
+    toolbar.appendChild(helpButton);
+  }
+
+  private async showHelpMenu() {
+    if (!IS_TAURI) return;
+    
+    try {
+      const updater = await import('./updater');
+      await updater.checkForUpdates();
+    } catch (error) {
+      console.warn('更新チェックに失敗:', error);
+    }
   }
 }
 

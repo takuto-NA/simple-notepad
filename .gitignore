@@ -13,6 +13,13 @@ dist-web
 dist-ssr
 *.local
 
+# 🔐 セキュリティ関連ファイル（絶対にコミットしない）
+PRIVATE_KEYS.txt
+*.pem
+organization_keys*
+private_key*
+signing_key*
+
 # Tauri (Rust) build outputs - VERY LARGE!
 src-tauri/target/
 src-tauri/Cargo.lock
