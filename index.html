@@ -83,6 +83,9 @@
             
             <div class="hidden lg:block toolbar-separator"></div>
             
+            <!-- Language Toggle -->
+            <button id="language-toggle" class="toolbar-btn" title="Language">🌐</button>
+            
             <!-- Dark Mode Toggle -->
             <button id="dark-mode-toggle" class="toolbar-btn icon-theme" title="ダークモード切り替え (Ctrl+D)"></button>
           </div>
@@ -162,6 +165,12 @@
                 <option value="Shift_JIS">Shift_JIS</option>
                 <option value="EUC-JP">EUC-JP</option>
                 <option value="ISO-2022-JP">ISO-2022-JP</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-3 p-2 bg-gray-100 dark:bg-gray-700 rounded">
+              <label class="text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">言語:</label>
+              <select id="language-select-mobile" class="flex-1 text-xs bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <!-- Options will be populated dynamically -->
               </select>
             </div>
           </div>

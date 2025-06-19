@@ -6,6 +6,82 @@ const IS_TAURI = typeof window !== 'undefined' &&
                  '__TAURI__' in window && 
                  !__IS_WEB_BUILD__;
 
+// Import i18n system
+import { availableLanguages, translations, getLanguageInfo, isLanguageSupported, getFallbackChain } from './i18n/languages';
+import type { LanguageInfo, TranslationData } from './i18n/languages';
+
+class I18n {
+  private currentLanguage: string = 'en'; // Default fallback
+  private fallbackLanguage: string = 'en';
+  
+  constructor() {
+    this.currentLanguage = this.detectLanguage();
+  }
+  
+  private detectLanguage(): string {
+    // Check saved preference first
+    const savedLang = localStorage.getItem('language');
+    if (savedLang && isLanguageSupported(savedLang)) {
+      return savedLang;
+    }
+    
+    // Auto-detect from browser language
+    const browserLang = navigator.language.toLowerCase();
+    
+    // Use fallback chain for better language matching
+    const fallbackChain = getFallbackChain(browserLang);
+    if (fallbackChain.length > 0) {
+      return fallbackChain[0];
+    }
+    
+    // Final fallback
+    return this.fallbackLanguage;
+  }
+  
+  public setLanguage(langCode: string): void {
+    if (isLanguageSupported(langCode)) {
+      this.currentLanguage = langCode;
+      localStorage.setItem('language', langCode);
+    }
+  }
+  
+  public getCurrentLanguage(): string {
+    return this.currentLanguage;
+  }
+  
+  public getAvailableLanguages(): LanguageInfo[] {
+    return availableLanguages;
+  }
+  
+  public t(key: string, params?: { [key: string]: string | number }): string {
+    // Try current language first
+    let translation = translations[this.currentLanguage]?.[key];
+    
+    // Fall back to fallback language
+    if (!translation) {
+      translation = translations[this.fallbackLanguage]?.[key];
+    }
+    
+    // Ultimate fallback to key itself
+    if (!translation) {
+      console.warn(`Missing translation key: ${key}`);
+      translation = key;
+    }
+    
+    // Replace parameters in translation
+    if (params) {
+      Object.entries(params).forEach(([paramKey, value]) => {
+        translation = translation.replace(`{${paramKey}}`, String(value));
+      });
+    }
+    
+    return translation;
+  }
+}
+
+// Global i18n instance
+const i18n = new I18n();
+
 interface EditorState {
   content: string;
   filePath: string | null;
@@ -68,6 +144,7 @@ class SimpleNotepad {
     this.initializeElements();
     this.setupEventListeners();
     this.initializeDarkMode();
+    this.initializeI18n(); // 多言語対応の初期化
     this.initializeCleanState(); // 白紙で新鮮な状態で開始
     this.updateDisplay();
     this.addToUndoStack();
@@ -106,7 +183,7 @@ class SimpleNotepad {
     this.state.modified = false;
     this.state.undoStack = [];
     this.state.redoStack = [];
-    this.statusText.textContent = '新しいファイルを作成しました';
+    this.statusText.textContent = i18n.t('status.newFile');
   }
 
   private focusEditor() {
@@ -117,6 +194,160 @@ class SimpleNotepad {
     }, 100);
   }
 
+  private initializeI18n() {
+    // Update UI elements with current language
+    this.updateAllTexts();
+    this.updateLanguageSelectors();
+  }
+
+  private updateAllTexts() {
+    // Update document title
+    document.title = i18n.t('app.title');
+    
+    // Update toolbar tooltips
+    const tooltips = [
+      { id: 'new-btn', key: 'toolbar.new' },
+      { id: 'open-btn', key: 'toolbar.open' },
+      { id: 'save-btn', key: 'toolbar.save' },
+      { id: 'save-as-btn', key: 'toolbar.saveAs' },
+      { id: 'undo-btn', key: 'toolbar.undo' },
+      { id: 'redo-btn', key: 'toolbar.redo' },
+      { id: 'find-btn', key: 'toolbar.find' },
+      { id: 'replace-btn', key: 'toolbar.replace' },
+      { id: 'toggle-line-numbers', key: 'toolbar.lineNumbers' },
+      { id: 'toggle-wrap', key: 'toolbar.wordWrap' },
+      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' },
+      { id: 'mobile-menu-btn', key: 'toolbar.menu' }
+    ];
+    
+    tooltips.forEach(({ id, key }) => {
+      const element = document.getElementById(id);
+      if (element) element.setAttribute('title', i18n.t(key));
+    });
+    
+    // Update mobile menu labels
+    const mobileLabels = [
+      { id: 'new-btn-mobile', key: 'mobile.new' },
+      { id: 'open-btn-mobile', key: 'mobile.open' },
+      { id: 'save-btn-mobile', key: 'mobile.save' },
+      { id: 'save-as-btn-mobile', key: 'mobile.saveAs' },
+      { id: 'undo-btn-mobile', key: 'mobile.undo' },
+      { id: 'redo-btn-mobile', key: 'mobile.redo' },
+      { id: 'find-btn-mobile', key: 'mobile.find' },
+      { id: 'replace-btn-mobile', key: 'mobile.replace' },
+      { id: 'toggle-line-numbers-mobile', key: 'mobile.lineNumbers' },
+      { id: 'toggle-wrap-mobile', key: 'mobile.wordWrap' }
+    ];
+    
+    mobileLabels.forEach(({ id, key }) => {
+      const element = document.getElementById(id);
+      if (element) {
+        const span = element.querySelector('span');
+        if (span) span.textContent = i18n.t(key);
+      }
+    });
+    
+    // Update search placeholders and buttons
+    this.searchInput.placeholder = i18n.t('search.placeholder');
+    this.replaceInput.placeholder = i18n.t('search.replacePlaceholder');
+    
+    const searchButtons = [
+      { id: 'find-prev', key: 'search.previous' },
+      { id: 'find-next', key: 'search.next' },
+      { id: 'replace-one', key: 'search.replace' },
+      { id: 'replace-all', key: 'search.replaceAll' }
+    ];
+    
+    searchButtons.forEach(({ id, key }) => {
+      const element = document.getElementById(id);
+      if (element) element.textContent = i18n.t(key);
+    });
+    
+    // Update editor placeholder
+    this.editor.placeholder = i18n.t('editor.placeholder');
+    
+    // Update Save As Dialog
+    const saveAsElements = [
+      { id: 'save-as-dialog', selector: 'h3', key: 'saveAs.title' },
+      { id: 'save-filename', selector: 'label', key: 'saveAs.filename' },
+      { id: 'save-encoding', selector: 'label', key: 'saveAs.encoding' },
+      { id: 'save-line-ending', selector: 'label', key: 'saveAs.lineEnding' },
+      { id: 'save-cancel', key: 'saveAs.cancel' },
+      { id: 'save-confirm', key: 'saveAs.confirm' }
+    ];
+    
+    saveAsElements.forEach(({ id, selector, key }) => {
+      if (selector) {
+        const container = document.getElementById(id);
+        if (container) {
+          const element = container.previousElementSibling as HTMLElement;
+          if (element && element.tagName === 'LABEL') {
+            element.textContent = i18n.t(key);
+          }
+        }
+      } else {
+        const element = document.getElementById(id);
+        if (element) element.textContent = i18n.t(key);
+      }
+    });
+    
+    // Update labels in mobile settings
+    const fontLabel = document.querySelector('label[class*="flex-shrink-0"]:has(+ #font-size-mobile)') as HTMLElement;
+    if (fontLabel) fontLabel.textContent = i18n.t('mobile.font');
+    
+    const encodingLabel = document.querySelector('label[class*="flex-shrink-0"]:has(+ #encoding-select-mobile)') as HTMLElement;
+    if (encodingLabel) encodingLabel.textContent = i18n.t('mobile.encoding');
+    
+    // Update web demo banner
+    const webBanner = document.getElementById('web-demo-banner');
+    if (webBanner) {
+      const link = webBanner.querySelector('a');
+      if (link) {
+        webBanner.innerHTML = `${i18n.t('banner.webDemo')} <a href="https://github.com/takuto-NA/simple-notepad/releases" class="underline font-semibold">${i18n.t('banner.downloadLink')}</a>`;
+      }
+    }
+  }
+
+  private toggleLanguage() {
+    const currentLang = i18n.getCurrentLanguage();
+    const newLang = currentLang === 'ja' ? 'en' : 'ja';
+    this.changeLanguage(newLang);
+  }
+
+  private changeLanguage(langCode: string) {
+    i18n.setLanguage(langCode);
+    this.updateAllTexts();
+    this.updateLanguageSelectors(); // Update language selectors
+    this.showEnvironmentInfo(); // Re-update environment info with new language
+  }
+
+  private changeLanguageMobile() {
+    const languageMobile = document.getElementById('language-select-mobile') as HTMLSelectElement;
+    this.changeLanguage(languageMobile.value);
+  }
+
+  private updateLanguageSelectors() {
+    const currentLang = i18n.getCurrentLanguage();
+    const languageMobile = document.getElementById('language-select-mobile') as HTMLSelectElement;
+    
+    // Update mobile selector
+    if (languageMobile) {
+      // Clear existing options
+      languageMobile.innerHTML = '';
+      
+      // Add all available languages
+      i18n.getAvailableLanguages().forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang.code;
+        option.textContent = lang.nativeName;
+        if (lang.code === currentLang) {
+          option.selected = true;
+        }
+        languageMobile.appendChild(option);
+      });
+    }
+  }
+
   private showEnvironmentInfo() {
     // 環境に応じた初期メッセージと表示調整
     const webBanner = document.getElementById('web-demo-banner');
@@ -124,11 +355,11 @@ class SimpleNotepad {
     if (IS_TAURI) {
       // Tauri版: バナーを非表示
       if (webBanner) webBanner.style.display = 'none';
-      this.statusText.textContent = 'デスクトップ版 - フル機能で準備完了';
+      this.statusText.textContent = i18n.t('status.desktop');
     } else {
       // Web版: バナーを表示
       if (webBanner) webBanner.style.display = 'block';
-      this.statusText.textContent = 'Web体験版 - ファイル保存はダウンロードになります';
+      this.statusText.textContent = i18n.t('status.webDemo');
       
       // Web版では高さ調整
       const app = document.getElementById('app');
@@ -169,6 +400,9 @@ class SimpleNotepad {
     document.getElementById('toggle-wrap')!.addEventListener('click', () => this.toggleWordWrap());
     this.darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
 
+    // Language Toggle
+    document.getElementById('language-toggle')!.addEventListener('click', () => this.toggleLanguage());
+
     // Mobile Menu Toggle
     document.getElementById('mobile-menu-btn')!.addEventListener('click', () => this.toggleMobileMenu());
 
@@ -187,6 +421,7 @@ class SimpleNotepad {
     // Mobile controls
     document.getElementById('font-size-mobile')!.addEventListener('change', () => this.changeFontSizeMobile());
     document.getElementById('encoding-select-mobile')!.addEventListener('change', () => this.changeEncodingMobile());
+    document.getElementById('language-select-mobile')!.addEventListener('change', () => this.changeLanguageMobile());
 
     // Search functionality
     document.getElementById('find-prev')!.addEventListener('click', () => this.findPrevious());
@@ -293,7 +528,7 @@ class SimpleNotepad {
     this.state.encoding = encodingMobile.value;
     this.encodingSelect.value = encodingMobile.value; // Sync with desktop select
     this.updateDisplay();
-    this.statusText.textContent = `文字コードを ${this.state.encoding} に変更しました`;
+    this.statusText.textContent = i18n.t('status.encodingChanged', { encoding: this.state.encoding });
   }
 
   private changeEncoding() {
@@ -302,7 +537,7 @@ class SimpleNotepad {
     const encodingMobile = document.getElementById('encoding-select-mobile') as HTMLSelectElement;
     if (encodingMobile) encodingMobile.value = this.encodingSelect.value;
     this.updateDisplay();
-    this.statusText.textContent = `文字コードを ${this.state.encoding} に変更しました`;
+    this.statusText.textContent = i18n.t('status.encodingChanged', { encoding: this.state.encoding });
   }
 
   private showSaveAsDialog() {
@@ -794,11 +1029,11 @@ class SimpleNotepad {
     const line = lines.length;
     const col = lines[lines.length - 1].length + 1;
     
-    this.cursorPosition.textContent = `行 ${line}, 列 ${col}`;
+    this.cursorPosition.textContent = `${i18n.t('position.line')} ${line}, ${i18n.t('position.column')} ${col}`;
     
     const selectionLength = this.editor.selectionEnd - this.editor.selectionStart;
     if (selectionLength > 0) {
-      this.selectionInfo.textContent = `(${selectionLength} 文字選択)`;
+      this.selectionInfo.textContent = `(${i18n.t('position.selected', { count: selectionLength })})`;
     } else {
       this.selectionInfo.textContent = '';
     }
@@ -851,10 +1086,10 @@ class SimpleNotepad {
 
   private updateDisplay() {
     // Update character count
-    this.charCount.textContent = `${this.state.content.length} 文字`;
+    this.charCount.textContent = i18n.t('position.characters', { count: this.state.content.length });
     
     // Update file info
-    const fileName = this.state.filePath || '新規ドキュメント';
+    const fileName = this.state.filePath || i18n.t('status.newDocument');
     const modifiedMark = this.state.modified ? ' *' : '';
     this.fileInfo.textContent = fileName + modifiedMark;
     
@@ -862,7 +1097,7 @@ class SimpleNotepad {
     this.encoding.textContent = this.state.encoding;
     
     // Update window title
-    document.title = `${fileName}${modifiedMark} - シンプルメモ帳`;
+    document.title = `${fileName}${modifiedMark} - ${i18n.t('app.title')}`;
     
     // Update cursor position
     this.updateCursorPosition();
@@ -970,7 +1205,7 @@ class SimpleNotepad {
       this.updateDisplay();
       this.updateLineNumbers();
       this.updateToolbarState();
-      this.statusText.textContent = `ファイル "${file.name}" を開きました (${this.state.encoding})`;
+      this.statusText.textContent = `${i18n.t('status.fileOpened')}: "${file.name}" (${this.state.encoding})`;
     };
     reader.readAsText(file, this.state.encoding);
   }
