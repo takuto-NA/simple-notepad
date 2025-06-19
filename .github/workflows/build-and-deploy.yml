@@ -83,10 +83,130 @@ jobs:
           name: desktop-${{ matrix.platform }}
           path: src-tauri/target/release/bundle/
 
+  # ラズパイ・ARM版ビルド（タグpush または手動実行時のみ）
+  build-arm:
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+            platform: ubuntu-22.04
+            arch: arm64
+            name: raspberry-pi-arm64
+          - target: armv7-unknown-linux-gnueabihf
+            platform: ubuntu-22.04
+            arch: armv7
+            name: raspberry-pi-armv7
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: latest
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-store-
+          
+      - name: Install Rust with cross-compilation support
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          
+      - name: Install cross-compilation dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-aarch64-linux-gnu \
+            gcc-arm-linux-gnueabihf \
+            pkg-config \
+            libssl-dev \
+            build-essential
+          
+          # ARM64用
+          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
+            sudo apt-get install -y \
+              libgtk-3-dev:arm64 \
+              libwebkit2gtk-4.0-dev:arm64 \
+              libwebkit2gtk-4.1-dev:arm64 \
+              libayatana-appindicator3-dev:arm64 \
+              librsvg2-dev:arm64 \
+              libsoup-3.0-dev:arm64 \
+              libjavascriptcoregtk-4.1-dev:arm64
+          fi
+          
+          # ARMv7用  
+          if [ "${{ matrix.target }}" = "armv7-unknown-linux-gnueabihf" ]; then
+            sudo apt-get install -y \
+              libgtk-3-dev:armhf \
+              libwebkit2gtk-4.0-dev:armhf \
+              libwebkit2gtk-4.1-dev:armhf \
+              libayatana-appindicator3-dev:armhf \
+              librsvg2-dev:armhf \
+              libsoup-3.0-dev:armhf \
+              libjavascriptcoregtk-4.1-dev:armhf
+          fi
+        
+      - name: Configure cross-compilation environment
+        run: |
+          # ARM64用環境変数
+          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
+            echo "CC_aarch64_unknown_linux_gnu=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+            echo "CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++" >> $GITHUB_ENV
+            echo "AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar" >> $GITHUB_ENV
+            echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
+            echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+            echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+          fi
+          
+          # ARMv7用環境変数
+          if [ "${{ matrix.target }}" = "armv7-unknown-linux-gnueabihf" ]; then
+            echo "CC_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+            echo "CXX_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-g++" >> $GITHUB_ENV
+            echo "AR_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-ar" >> $GITHUB_ENV
+            echo "CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
+            echo "PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
+            echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+          fi
+        
+      - name: Install dependencies
+        run: pnpm install
+        
+      - name: Build ARM Desktop App
+        run: |
+          # メモリ使用量を制限（GitHub Actionsでの安定性向上）
+          export NODE_OPTIONS="--max_old_space_size=2048"
+          export CARGO_BUILD_JOBS=2
+          
+          # ARM向けビルド実行
+          pnpm tauri build --target ${{ matrix.target }}
+        
+      - name: Upload ARM Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.name }}
+          path: src-tauri/target/${{ matrix.target }}/release/bundle/
+
   # GitHub Release作成（タグpush時のみ）
   create-release:
     if: startsWith(github.ref, 'refs/tags/')
-    needs: build-desktop
+    needs: [build-desktop, build-arm]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -119,10 +239,27 @@ jobs:
             done
           fi
           
-          # Linux files
+          # Linux x64 files
           if [ -d "artifacts/desktop-ubuntu-22.04" ]; then
             find artifacts/desktop-ubuntu-22.04 -name "*.deb" -o -name "*.AppImage" | while read file; do
-              cp "$file" release-files/
+              basename_file=$(basename "$file")
+              cp "$file" release-files/"${basename_file%.*}-x64.${basename_file##*.}"
+            done
+          fi
+          
+          # ARM64 files (Raspberry Pi 4+)
+          if [ -d "artifacts/desktop-raspberry-pi-arm64" ]; then
+            find artifacts/desktop-raspberry-pi-arm64 -name "*.deb" -o -name "*.AppImage" | while read file; do
+              basename_file=$(basename "$file")
+              cp "$file" release-files/"${basename_file%.*}-arm64.${basename_file##*.}"
+            done
+          fi
+          
+          # ARMv7 files (Raspberry Pi 3+)
+          if [ -d "artifacts/desktop-raspberry-pi-armv7" ]; then
+            find artifacts/desktop-raspberry-pi-armv7 -name "*.deb" -o -name "*.AppImage" | while read file; do
+              basename_file=$(basename "$file")
+              cp "$file" release-files/"${basename_file%.*}-armv7.${basename_file##*.}"
             done
           fi
           
@@ -140,13 +277,20 @@ jobs:
             ## 💾 ダウンロード
             - **Windows**: `.msi` または `.exe` ファイル
             - **macOS**: `.dmg` または `.app.tar.gz` ファイル  
-            - **Linux**: `.deb` または `.AppImage` ファイル
+            - **Linux (x64)**: `*-x64.deb` または `*-x64.AppImage` ファイル
+            - **🍓 Raspberry Pi 4+ (ARM64)**: `*-arm64.deb` または `*-arm64.AppImage` ファイル
+            - **🍓 Raspberry Pi 3+ (ARMv7)**: `*-armv7.deb` または `*-armv7.AppImage` ファイル
             
             ## 🌐 Web体験版
             [ブラウザで今すぐ試す](https://takuto-na.github.io/simple-notepad/)
             
             ## 📱 モバイル対応
             このバージョンではスマホ・タブレット対応が改善されました！
+            
+            ## 🍓 Raspberry Pi対応
+            - **Pi 4以降**: ARM64版を推奨（高性能）
+            - **Pi 3以降**: ARMv7版も利用可能
+            - **推奨**: 4GB RAM以上のモデル
             
             ## 🛠️ インストール方法
             1. お使いのOSに対応したファイルをダウンロード
