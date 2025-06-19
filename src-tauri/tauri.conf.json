@@ -38,7 +38,7 @@
     ],
     "windows": {
       "wix": {
-        "language": ["en-US", "ja-JP", "zh-CN", "fr-FR", "de-DE", "es-ES", "ko-KR"]
+        "language": "en-US"
       }
     }
   },

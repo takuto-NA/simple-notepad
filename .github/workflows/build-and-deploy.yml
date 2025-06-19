@@ -294,15 +294,15 @@ jobs:
             "platforms": {
               "windows-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/simple-notepad_${{ github.ref_name }}_x64_en-US.msi"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_x64_en-US.msi"
               },
               "linux-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/simple-notepad_${{ github.ref_name }}_amd64.AppImage"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_amd64-x64.AppImage"
               },
               "darwin-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/simple-notepad_${{ github.ref_name }}_x64.dmg"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_aarch64.dmg"
               }
             }
           }
