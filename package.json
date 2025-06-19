@@ -2,6 +2,7 @@
   "name": "simple-notepad",
   "description": "A truly simple notepad application built with Tauri + TypeScript + Tailwind CSS. Features clean UI, dark mode, internationalization, and cross-platform support.",
   "keywords": ["notepad", "text-editor", "tauri", "typescript", "tailwind", "cross-platform", "i18n", "dark-mode", "simple", "minimal"],
+  "license": "MIT",
   "private": true,
   "version": "1.0.0",
   "type": "module",

@@ -7,11 +7,7 @@ const IS_TAURI = typeof window !== 'undefined' &&
                  '__TAURI__' in window && 
                  !__IS_WEB_BUILD__;
 
-interface UpdateInfo {
-  version: string;
-  date: string;
-  body: string;
-}
+// UpdateInfo interface removed as it's not used
 
 let dialogModule: any = null;
 let updaterModule: any = null;

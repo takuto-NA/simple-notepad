@@ -368,7 +368,14 @@ For detailed instructions, see [CONTRIBUTING_I18N.md](CONTRIBUTING_I18N.md).
 
 ## License
 
-This project is open source. Feel free to use, modify, and distribute according to the license terms.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### What this means:
+- ✅ **Commercial use**: Use in commercial projects
+- ✅ **Modification**: Modify the source code
+- ✅ **Distribution**: Distribute original or modified versions
+- ✅ **Private use**: Use for private projects
+- ℹ️ **License notice**: Include copyright notice in distributions
 
 ## Feedback & Contributions
 

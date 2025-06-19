@@ -1304,7 +1304,7 @@ class SimpleNotepad {
     
     try {
       const updater = await import('./updater');
-      await updater.checkForUpdates();
+      await updater.checkUpdatesManually();
     } catch (error) {
       console.warn('更新チェックに失敗:', error);
     }

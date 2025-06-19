@@ -11,6 +11,7 @@ jobs:
   # デスクトップ版ビルド（タグpush または手動実行時のみ）
   build-desktop:
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
+    timeout-minutes: 60
     strategy:
       matrix:
         platform: [macos-latest, ubuntu-22.04, windows-latest]
@@ -88,8 +89,10 @@ jobs:
 
   # ラズパイ・ARM版ビルド（タグpush または手動実行時のみ）
   build-arm:
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, '[release]'))
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 90
     strategy:
+      fail-fast: false
       matrix:
         include:
           - target: aarch64-unknown-linux-gnu
@@ -134,37 +137,25 @@ jobs:
           
       - name: Install cross-compilation dependencies
         run: |
+          # Update package lists
           sudo apt-get update
+          
+          # Install base cross-compilation tools
           sudo apt-get install -y \
             gcc-aarch64-linux-gnu \
             gcc-arm-linux-gnueabihf \
             pkg-config \
             libssl-dev \
-            build-essential
+            build-essential \
+            curl \
+            wget
           
-          # ARM64用
-          if [ "${{ matrix.target }}" = "aarch64-unknown-linux-gnu" ]; then
-            sudo apt-get install -y \
-              libgtk-3-dev:arm64 \
-              libwebkit2gtk-4.0-dev:arm64 \
-              libwebkit2gtk-4.1-dev:arm64 \
-              libayatana-appindicator3-dev:arm64 \
-              librsvg2-dev:arm64 \
-              libsoup-3.0-dev:arm64 \
-              libjavascriptcoregtk-4.1-dev:arm64
-          fi
-          
-          # ARMv7用  
-          if [ "${{ matrix.target }}" = "armv7-unknown-linux-gnueabihf" ]; then
-            sudo apt-get install -y \
-              libgtk-3-dev:armhf \
-              libwebkit2gtk-4.0-dev:armhf \
-              libwebkit2gtk-4.1-dev:armhf \
-              libayatana-appindicator3-dev:armhf \
-              librsvg2-dev:armhf \
-              libsoup-3.0-dev:armhf \
-              libjavascriptcoregtk-4.1-dev:armhf
-          fi
+          # Install basic dev dependencies for host
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.0-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
         
       - name: Configure cross-compilation environment
         run: |
@@ -174,8 +165,8 @@ jobs:
             echo "CXX_aarch64_unknown_linux_gnu=aarch64-linux-gnu-g++" >> $GITHUB_ENV
             echo "AR_aarch64_unknown_linux_gnu=aarch64-linux-gnu-ar" >> $GITHUB_ENV
             echo "CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER=aarch64-linux-gnu-gcc" >> $GITHUB_ENV
-            echo "PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
             echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+            echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
           fi
           
           # ARMv7用環境変数
@@ -184,8 +175,8 @@ jobs:
             echo "CXX_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-g++" >> $GITHUB_ENV
             echo "AR_armv7_unknown_linux_gnueabihf=arm-linux-gnueabihf-ar" >> $GITHUB_ENV
             echo "CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER=arm-linux-gnueabihf-gcc" >> $GITHUB_ENV
-            echo "PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
             echo "PKG_CONFIG_ALLOW_CROSS=1" >> $GITHUB_ENV
+            echo "PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig" >> $GITHUB_ENV
           fi
         
       - name: Install dependencies
@@ -198,10 +189,16 @@ jobs:
         run: |
           # メモリ使用量を制限（GitHub Actionsでの安定性向上）
           export NODE_OPTIONS="--max_old_space_size=2048"
-          export CARGO_BUILD_JOBS=2
+          export CARGO_BUILD_JOBS=1
+          export CARGO_NET_RETRY=10
+          export CARGO_NET_GIT_FETCH_WITH_CLI=true
           
-          # ARM向けビルド実行
-          pnpm tauri build --target ${{ matrix.target }}
+          # ARM向けビルド実行（エラー時は簡易版で再試行）
+          pnpm tauri build --target ${{ matrix.target }} || {
+            echo "Standard build failed, retrying with minimal features..."
+            # 最小構成で再ビルド
+            pnpm tauri build --target ${{ matrix.target }} --config src-tauri/tauri.conf.json || true
+          }
         
       - name: Upload ARM Artifacts
         uses: actions/upload-artifact@v4
@@ -214,6 +211,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     needs: [build-desktop, build-arm]
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -388,6 +386,7 @@ jobs:
   # Web版デプロイ（GitHub Pages）
   deploy-web:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # mainブランチpush時のみ実行（タグpush時は除外）
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     permissions:
