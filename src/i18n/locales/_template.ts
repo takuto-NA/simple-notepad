@@ -63,6 +63,8 @@ export default {
   'search.replace': '[TRANSLATE: Replace]',
   'search.replaceAll': '[TRANSLATE: Replace All]',
   'search.close': '✕', // Keep this symbol
+  'search.notFound': '[TRANSLATE: Not found]',
+  'search.results': '[TRANSLATE: {current} / {total} matches]',
   
   // Save As Dialog
   'saveAs.title': '[TRANSLATE: Save As]',
@@ -85,6 +87,8 @@ export default {
   'status.fileSaved': '[TRANSLATE: File saved]',
   'status.encodingChanged': '[TRANSLATE: Changed encoding to {encoding}]', // Keep {encoding}
   'status.languageChanged': '[TRANSLATE: Language changed to {language}]', // Keep {language}
+  'status.darkModeOn': '[TRANSLATE: Switched to dark mode]',
+  'status.darkModeOff': '[TRANSLATE: Switched to light mode]',
   
   // Position indicators
   'position.line': '[TRANSLATE: Line]',
@@ -96,6 +100,7 @@ export default {
   'error.fileRead': '[TRANSLATE: Failed to read file]',
   'error.fileSave': '[TRANSLATE: Failed to save file]',
   'error.unsupportedFormat': '[TRANSLATE: Unsupported file format]',
+  'error.emptyFilename': '[TRANSLATE: Please enter a filename.]',
   
   // Web demo banner
   'banner.webDemo': '[TRANSLATE: 📱 This is a demo version • File saving works as download •]',

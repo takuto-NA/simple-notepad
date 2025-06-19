@@ -76,6 +76,8 @@ export default {
   'status.fileSaved': 'ファイルを保存しました',
   'status.encodingChanged': '文字コードを {encoding} に変更しました',
   'status.languageChanged': '言語を {language} に変更しました',
+  'status.darkModeOn': 'ダークモードに切り替えました',
+  'status.darkModeOff': 'ライトモードに切り替えました',
   
   // Position indicators
   'position.line': '行',
@@ -87,6 +89,11 @@ export default {
   'error.fileRead': 'ファイルの読み込みに失敗しました',
   'error.fileSave': 'ファイルの保存に失敗しました',
   'error.unsupportedFormat': 'サポートされていないファイル形式です',
+  'error.emptyFilename': 'ファイル名を入力してください。',
+  
+  // Search results
+  'search.notFound': '見つかりませんでした',
+  'search.results': '{current} / {total} 件',
   
   // Web demo banner
   'banner.webDemo': '📱 これは体験版です • ファイル保存はダウンロードになります •',

@@ -10,6 +10,11 @@ const IS_TAURI = typeof window !== 'undefined' &&
 import { availableLanguages, translations, isLanguageSupported, getFallbackChain } from './i18n/languages';
 import type { LanguageInfo } from './i18n/languages';
 
+// Import auto-update functionality
+import { check } from '@tauri-apps/plugin-updater';
+import { ask, message } from '@tauri-apps/plugin-dialog';
+import { relaunch } from '@tauri-apps/api/process';
+
 class I18n {
   private currentLanguage: string = 'en'; // Default fallback
   private fallbackLanguage: string = 'en';
@@ -198,14 +203,49 @@ class SimpleNotepad {
     // Update UI elements with current language
     this.updateAllTexts();
     this.updateLanguageSelectors();
+    this.updateDocumentLanguage();
+  }
+
+  private updateDocumentLanguage() {
+    // Update document language attribute
+    document.documentElement.lang = i18n.getCurrentLanguage();
   }
 
   private updateAllTexts() {
     // Update document title
     document.title = i18n.t('app.title');
     
+    // Update web demo banner
+    const webBanner = document.getElementById('web-demo-banner');
+    if (webBanner) {
+      webBanner.innerHTML = `${i18n.t('banner.webDemo')} <a href="https://github.com/takuto-NA/simple-notepad/releases" class="underline font-semibold">${i18n.t('banner.downloadLink')}</a>`;
+    }
+    
     // Update toolbar tooltips
-    const tooltips = [
+    this.updateToolbarTooltips();
+    
+    // Update mobile menu labels
+    this.updateMobileMenuLabels();
+    
+    // Update search bar
+    this.updateSearchBarText();
+    
+    // Update editor placeholder
+    const editor = document.getElementById('editor') as HTMLTextAreaElement;
+    if (editor) {
+      editor.placeholder = i18n.t('editor.placeholder');
+    }
+    
+    // Update status bar
+    this.updateStatusBarText();
+    
+    // Update save dialog
+    this.updateSaveDialogText();
+  }
+
+  private updateToolbarTooltips() {
+    const tooltipElements = [
+      { id: 'mobile-menu-btn', key: 'toolbar.menu' },
       { id: 'new-btn', key: 'toolbar.new' },
       { id: 'open-btn', key: 'toolbar.open' },
       { id: 'save-btn', key: 'toolbar.save' },
@@ -216,16 +256,18 @@ class SimpleNotepad {
       { id: 'replace-btn', key: 'toolbar.replace' },
       { id: 'toggle-line-numbers', key: 'toolbar.lineNumbers' },
       { id: 'toggle-wrap', key: 'toolbar.wordWrap' },
-      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' },
-      { id: 'mobile-menu-btn', key: 'toolbar.menu' }
+      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' }
     ];
-    
-    tooltips.forEach(({ id, key }) => {
+
+    tooltipElements.forEach(({ id, key }) => {
       const element = document.getElementById(id);
-      if (element) element.setAttribute('title', i18n.t(key));
+      if (element) {
+        element.title = i18n.t(key);
+      }
     });
-    
-    // Update mobile menu labels
+  }
+
+  private updateMobileMenuLabels() {
     const mobileLabels = [
       { id: 'new-btn-mobile', key: 'mobile.new' },
       { id: 'open-btn-mobile', key: 'mobile.open' },
@@ -238,72 +280,88 @@ class SimpleNotepad {
       { id: 'toggle-line-numbers-mobile', key: 'mobile.lineNumbers' },
       { id: 'toggle-wrap-mobile', key: 'mobile.wordWrap' }
     ];
-    
+
     mobileLabels.forEach(({ id, key }) => {
       const element = document.getElementById(id);
       if (element) {
-        const span = element.querySelector('span');
-        if (span) span.textContent = i18n.t(key);
+        const span = element.querySelector('.text-xs');
+        if (span) {
+          span.textContent = i18n.t(key);
+        }
+        element.title = i18n.t(key);
       }
     });
-    
-    // Update search placeholders and buttons
-    this.searchInput.placeholder = i18n.t('search.placeholder');
-    this.replaceInput.placeholder = i18n.t('search.replacePlaceholder');
-    
-    const searchButtons = [
+
+    // Update mobile settings labels
+    const fontLabel = document.querySelector('[for="font-size-mobile"], label:has(+ #font-size-mobile)');
+    if (fontLabel) {
+      fontLabel.textContent = i18n.t('mobile.font');
+    }
+
+    const encodingLabel = document.querySelector('[for="encoding-select-mobile"], label:has(+ #encoding-select-mobile)');
+    if (encodingLabel) {
+      encodingLabel.textContent = i18n.t('mobile.encoding');
+    }
+
+    const languageLabel = document.querySelector('[for="language-select-mobile"], label:has(+ #language-select-mobile)');
+    if (languageLabel) {
+      languageLabel.textContent = i18n.t('mobile.language');
+    }
+  }
+
+  private updateSearchBarText() {
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    if (searchInput) {
+      searchInput.placeholder = i18n.t('search.placeholder');
+    }
+
+    const replaceInput = document.getElementById('replace-input') as HTMLInputElement;
+    if (replaceInput) {
+      replaceInput.placeholder = i18n.t('search.replacePlaceholder');
+    }
+
+    const buttons = [
       { id: 'find-prev', key: 'search.previous' },
       { id: 'find-next', key: 'search.next' },
       { id: 'replace-one', key: 'search.replace' },
       { id: 'replace-all', key: 'search.replaceAll' }
     ];
-    
-    searchButtons.forEach(({ id, key }) => {
+
+    buttons.forEach(({ id, key }) => {
       const element = document.getElementById(id);
-      if (element) element.textContent = i18n.t(key);
-    });
-    
-    // Update editor placeholder
-    this.editor.placeholder = i18n.t('editor.placeholder');
-    
-    // Update Save As Dialog
-    const saveAsElements = [
-      { id: 'save-as-dialog', selector: 'h3', key: 'saveAs.title' },
-      { id: 'save-filename', selector: 'label', key: 'saveAs.filename' },
-      { id: 'save-encoding', selector: 'label', key: 'saveAs.encoding' },
-      { id: 'save-line-ending', selector: 'label', key: 'saveAs.lineEnding' },
-      { id: 'save-cancel', key: 'saveAs.cancel' },
-      { id: 'save-confirm', key: 'saveAs.confirm' }
-    ];
-    
-    saveAsElements.forEach(({ id, selector, key }) => {
-      if (selector) {
-        const container = document.getElementById(id);
-        if (container) {
-          const element = container.previousElementSibling as HTMLElement;
-          if (element && element.tagName === 'LABEL') {
-            element.textContent = i18n.t(key);
-          }
-        }
-      } else {
-        const element = document.getElementById(id);
-        if (element) element.textContent = i18n.t(key);
+      if (element) {
+        element.textContent = i18n.t(key);
       }
     });
-    
-    // Update labels in mobile settings
-    const fontLabel = document.querySelector('label[class*="flex-shrink-0"]:has(+ #font-size-mobile)') as HTMLElement;
-    if (fontLabel) fontLabel.textContent = i18n.t('mobile.font');
-    
-    const encodingLabel = document.querySelector('label[class*="flex-shrink-0"]:has(+ #encoding-select-mobile)') as HTMLElement;
-    if (encodingLabel) encodingLabel.textContent = i18n.t('mobile.encoding');
-    
-    // Update web demo banner
-    const webBanner = document.getElementById('web-demo-banner');
-    if (webBanner) {
-      const link = webBanner.querySelector('a');
-      if (link) {
-        webBanner.innerHTML = `${i18n.t('banner.webDemo')} <a href="https://github.com/takuto-NA/simple-notepad/releases" class="underline font-semibold">${i18n.t('banner.downloadLink')}</a>`;
+  }
+
+  private updateStatusBarText() {
+    // Update encoding label
+    const encodingLabelElement = document.querySelector('.text-xs.text-gray-600:has(+ #encoding-select)');
+    if (encodingLabelElement) {
+      encodingLabelElement.textContent = i18n.t('mobile.encoding');
+    }
+  }
+
+  private updateSaveDialogText() {
+    const saveDialog = document.getElementById('save-as-dialog');
+    if (saveDialog) {
+      const title = saveDialog.querySelector('h3');
+      if (title) {
+        title.textContent = i18n.t('saveAs.title');
+      }
+
+      const labels = saveDialog.querySelectorAll('label');
+      if (labels.length >= 3) {
+        labels[0].textContent = i18n.t('saveAs.filename');
+        labels[1].textContent = i18n.t('saveAs.encoding');
+        labels[2].textContent = i18n.t('saveAs.lineEnding');
+      }
+
+      const buttons = saveDialog.querySelectorAll('button');
+      if (buttons.length >= 2) {
+        buttons[0].textContent = i18n.t('saveAs.cancel');
+        buttons[1].textContent = i18n.t('saveAs.confirm');
       }
     }
   }
@@ -314,11 +372,15 @@ class SimpleNotepad {
     this.changeLanguage(newLang);
   }
 
-  private changeLanguage(langCode: string) {
-    i18n.setLanguage(langCode);
+  private changeLanguage(languageCode: string) {
+    i18n.setLanguage(languageCode);
     this.updateAllTexts();
-    this.updateLanguageSelectors(); // Update language selectors
-    this.showEnvironmentInfo(); // Re-update environment info with new language
+    this.updateLanguageSelectors();
+    this.updateDocumentLanguage();
+    const currentLangCode = i18n.getCurrentLanguage();
+    const langInfo = availableLanguages.find(lang => lang.code === currentLangCode);
+    const langName = langInfo ? langInfo.nativeName : currentLangCode;
+    this.statusText.textContent = i18n.t('status.languageChanged', { language: langName });
   }
 
   private changeLanguageMobile() {
@@ -497,7 +559,7 @@ class SimpleNotepad {
   private toggleDarkMode() {
     this.state.darkMode = !this.state.darkMode;
     this.applyDarkMode();
-    this.statusText.textContent = this.state.darkMode ? 'ダークモードに切り替えました' : 'ライトモードに切り替えました';
+    this.statusText.textContent = i18n.t(this.state.darkMode ? 'status.darkModeOn' : 'status.darkModeOff');
   }
 
   private toggleMobileMenu() {
@@ -566,7 +628,7 @@ class SimpleNotepad {
 
     const filename = filenameInput.value.trim();
     if (!filename) {
-      alert('ファイル名を入力してください。');
+      alert(i18n.t('error.emptyFilename'));
       return;
     }
 
@@ -714,24 +776,21 @@ class SimpleNotepad {
   }
 
   private newFile() {
-    if (this.state.modified && !confirm('未保存の変更があります。新規作成しますか？')) {
+    if (this.state.modified && !confirm(i18n.t('confirm.newFile'))) {
       return;
     }
     
-    this.state.content = '';
-    this.state.filePath = null;
-    this.state.modified = false;
-    this.state.undoStack = [''];
-    this.state.redoStack = [];
+    this.initializeCleanState();
     this.editor.value = '';
+    this.state.content = '';
     this.updateDisplay();
     this.updateLineNumbers();
     this.updateToolbarState();
-    this.statusText.textContent = '新規ドキュメントを作成しました';
+    this.statusText.textContent = i18n.t('status.newFile');
   }
 
   private openFile() {
-    if (this.state.modified && !confirm('未保存の変更があります。ファイルを開きますか？')) {
+    if (this.state.modified && !confirm(i18n.t('confirm.unsavedChanges'))) {
       return;
     }
     this.fileInput.click();
@@ -840,7 +899,7 @@ class SimpleNotepad {
     this.clearSearchHighlights();
     const term = this.searchInput.value;
     if (!term) {
-      this.statusText.textContent = '準備完了';
+      this.statusText.textContent = i18n.t('status.ready');
       return;
     }
 
@@ -913,9 +972,12 @@ class SimpleNotepad {
 
   private updateSearchStatus() {
     if (this.searchState.matches.length === 0) {
-      this.statusText.textContent = this.searchState.term ? '見つかりませんでした' : '準備完了';
+      this.statusText.textContent = this.searchState.term ? i18n.t('search.notFound') : i18n.t('status.ready');
     } else {
-      this.statusText.textContent = `${this.searchState.currentMatch + 1} / ${this.searchState.matches.length} 件`;
+      this.statusText.textContent = i18n.t('search.results', { 
+        current: this.searchState.currentMatch + 1, 
+        total: this.searchState.matches.length 
+      });
     }
   }
 
@@ -1187,7 +1249,7 @@ class SimpleNotepad {
   }
 
   private loadDroppedFile(file: File) {
-    if (this.state.modified && !confirm('未保存の変更があります。ファイルを開きますか？')) {
+    if (this.state.modified && !confirm(i18n.t('confirm.unsavedChanges'))) {
       return;
     }
 

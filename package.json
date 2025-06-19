@@ -1,5 +1,7 @@
 {
   "name": "simple-notepad",
+  "description": "A truly simple notepad application built with Tauri + TypeScript + Tailwind CSS. Features clean UI, dark mode, internationalization, and cross-platform support.",
+  "keywords": ["notepad", "text-editor", "tauri", "typescript", "tailwind", "cross-platform", "i18n", "dark-mode", "simple", "minimal"],
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -8,7 +10,7 @@
     "dev:tauri": "tauri dev",
     "build": "tsc && vite build",
     "build:tauri": "tauri build",
-    "build:web": "tsc && vite build --config vite.config.web.ts",
+    "build:web": "vite build --config vite.config.web.ts",
     "preview": "vite preview",
     "preview:web": "vite preview --base=/memo/",
     "tauri": "tauri",
@@ -17,7 +19,9 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2"
+    "@tauri-apps/plugin-opener": "^2",
+    "@tauri-apps/plugin-updater": "^2",
+    "@tauri-apps/plugin-dialog": "^2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

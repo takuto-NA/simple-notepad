@@ -75,6 +75,8 @@ export default {
   'status.fileSaved': 'File saved',
   'status.encodingChanged': 'Changed encoding to {encoding}',
   'status.languageChanged': 'Language changed to {language}',
+  'status.darkModeOn': 'Switched to dark mode',
+  'status.darkModeOff': 'Switched to light mode',
   
   // Position indicators
   'position.line': 'Line',
@@ -86,6 +88,7 @@ export default {
   'error.fileRead': 'Failed to read file',
   'error.fileSave': 'Failed to save file',
   'error.unsupportedFormat': 'Unsupported file format',
+  'error.emptyFilename': 'Please enter a filename.',
   
   // Web demo banner
   'banner.webDemo': '📱 This is a demo version • File saving works as download •',
@@ -105,5 +108,9 @@ export default {
   'a11y.menuCollapsed': 'Menu collapsed',
   'a11y.searchActive': 'Search mode active',
   'a11y.darkModeOn': 'Dark mode on',
-  'a11y.darkModeOff': 'Dark mode off'
+  'a11y.darkModeOff': 'Dark mode off',
+  
+  // Search results
+  'search.notFound': 'Not found',
+  'search.results': '{current} / {total} matches'
 }; 

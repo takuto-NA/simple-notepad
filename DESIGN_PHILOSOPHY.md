@@ -1,100 +1,100 @@
-# Pure Function Apps - 設計哲学
+# Pure Function Apps - Design Philosophy
 
-このドキュメントは、シンプルで実用的なデスクトップアプリケーション群を開発するための共通設計哲学です。
+This document outlines the common design philosophy for developing simple and practical desktop application suites.
 
-## 🎯 核となる5つの哲学
+## 🎯 Five Core Philosophies
 
-### 1. 単機能純粋性 (Pure Function Philosophy)
-- **一つのアプリ = 一つの明確な目的**
-- 複合機能ではなく、それぞれが専門特化
-- Unix哲学「一つのことを、うまくやる」
+### 1. Single-Function Purity (Pure Function Philosophy)
+- **One app = One clear purpose**
+- Specialized rather than composite functions
+- Unix philosophy: "Do one thing, and do it well"
 
-### 2. 即座の準備状態 (Instant Ready State)
-- **起動 = すぐに作業開始**
-- 履歴や設定画面ではなく、白紙の新鮮な状態
-- 「新しい気持ち」で始められる体験
+### 2. Instant Ready State
+- **Startup = Immediate work readiness**
+- Fresh blank state, not history or settings screens
+- Experience that lets you start with a "fresh mindset"
 
-### 3. 軽量ユニバーサル (Lightweight Universal)
-- **どこでも同じ体験**
-- ネイティブ性能 + Web互換性
-- リソースを最小限に抑制
-- Raspberry Piでも快適動作
+### 3. Lightweight Universal
+- **Same experience everywhere**
+- Native performance + Web compatibility
+- Minimal resource consumption
+- Smooth operation even on Raspberry Pi
 
-### 4. 視覚的ミニマリズム (Visual Minimalism)
-- **機能が見た目**
-- 装飾 < 実用性
-- 認知負荷の最小化
-- 90%以上を作業領域に
+### 4. Visual Minimalism
+- **Function is the appearance**
+- Utility > Decoration
+- Minimize cognitive load
+- 90%+ dedicated to work area
 
-### 5. 直感的操作 (Intuitive Interaction)
-- **考えなくても使える**
-- キーボード最優先設計
-- マウスは補助的
-- ショートカットの統一
+### 5. Intuitive Interaction
+- **Usable without thinking**
+- Keyboard-first design
+- Mouse as auxiliary
+- Unified shortcuts
 
-## 🛠️ 技術スタック標準
+## 🛠️ Standard Technology Stack
 
-### フロントエンド
-- **フレームワーク**: Tauri + TypeScript
-- **スタイリング**: Tailwind CSS
-- **レンダリング**: HTML/CSS/JavaScript
+### Frontend
+- **Framework**: Tauri + TypeScript
+- **Styling**: Tailwind CSS
+- **Rendering**: HTML/CSS/JavaScript
 
-### バックエンド
-- **言語**: Rust
-- **権限**: 最小限の権限要求
+### Backend
+- **Language**: Rust
+- **Permissions**: Minimal permission requirements
 
-### 配布
-- **形式**: 単一実行ファイル
-- **サイズ**: 10MB以下を目標
-- **起動時間**: 3秒以内
+### Distribution
+- **Format**: Single executable file
+- **Size**: Target under 10MB
+- **Startup Time**: Within 3 seconds
 
-## 📋 アプリケーション設計チェックリスト
+## 📋 Application Design Checklist
 
-### ✅ 起動・終了
-- [ ] 3秒以内に起動
-- [ ] 白紙/初期状態で開始
-- [ ] 未保存データの確認ダイアログ
-- [ ] 緊急時のみ自動保存
+### ✅ Startup/Shutdown
+- [ ] Startup within 3 seconds
+- [ ] Start in blank/initial state
+- [ ] Unsaved data confirmation dialog
+- [ ] Auto-save only in emergencies
 
 ### ✅ UI/UX
-- [ ] 90%以上が作業領域
-- [ ] 必要最小限のツールバー
-- [ ] アイコンベースのボタン
-- [ ] ダークモード対応
-- [ ] 一貫したキーボードショートカット
+- [ ] 90%+ work area
+- [ ] Minimal necessary toolbar
+- [ ] Icon-based buttons
+- [ ] Dark mode support
+- [ ] Consistent keyboard shortcuts
 
-### ✅ 性能
-- [ ] メモリ使用量200MB以下
-- [ ] CPU使用率平常時5%以下
-- [ ] 大容量データ対応
-- [ ] Raspberry Pi動作確認
+### ✅ Performance
+- [ ] Memory usage under 200MB
+- [ ] CPU usage under 5% at idle
+- [ ] Large data handling
+- [ ] Raspberry Pi operation verification
 
-### ✅ 互換性
-- [ ] Windows/macOS/Linux対応
-- [ ] ARM64対応（Apple Silicon/Raspberry Pi）
-- [ ] 日本語対応
-- [ ] 文字コード自動判定
+### ✅ Compatibility
+- [ ] Windows/macOS/Linux support
+- [ ] ARM64 support (Apple Silicon/Raspberry Pi)
+- [ ] Japanese language support
+- [ ] Automatic character encoding detection
 
-## 🎨 UI設計パターン
+## 🎨 UI Design Patterns
 
-### レイアウト構造
+### Layout Structure
 ```
 ┌─────────────────────────────────┐
-│ [🔧] [💾] [🔍] [⚙️]    [状態表示] │ ← ツールバー (最小限)
+│ [🔧] [💾] [🔍] [⚙️]    [Status]  │ ← Toolbar (minimal)
 ├─────────────────────────────────┤
 │                                 │
 │                                 │
-│        メイン作業領域             │ ← 90%以上の面積
+│        Main Work Area           │ ← 90%+ of space
 │                                 │
 │                                 │
 ├─────────────────────────────────┤
-│ 行:1 列:1 | 文字数:0 | UTF-8      │ ← ステータスバー
+│ Line:1 Col:1 | Chars:0 | UTF-8   │ ← Status bar
 └─────────────────────────────────┘
 ```
 
-### カラーパレット
+### Color Palette
 ```css
-/* ライトモード */
+/* Light Mode */
 --bg-primary: #ffffff
 --bg-secondary: #f8f9fa
 --text-primary: #1a1a1a
@@ -102,7 +102,7 @@
 --border: #e5e5e5
 --accent: #2563eb
 
-/* ダークモード */
+/* Dark Mode */
 --bg-primary: #1a1a1a
 --bg-secondary: #2d2d2d
 --text-primary: #ffffff
@@ -111,161 +111,161 @@
 --accent: #60a5fa
 ```
 
-### ボタンスタイル
-- 32x32px 正方形
-- 絵文字アイコン使用
-- ホバー時の視覚フィードバック
-- アクティブ状態の表示
+### Button Style
+- 32x32px square
+- Emoji icons
+- Visual feedback on hover
+- Active state indication
 
-## ⌨️ 標準キーボードショートカット
+## ⌨️ Standard Keyboard Shortcuts
 
-### 共通操作
-| 機能 | ショートカット | 備考 |
-|------|-------------|------|
-| 新規作成 | `Ctrl+N` | 全アプリ共通 |
-| ファイル開く | `Ctrl+O` | ファイル系アプリ |
-| 保存 | `Ctrl+S` | 全アプリ共通 |
-| 名前を付けて保存 | `Ctrl+Shift+S` | 全アプリ共通 |
-| 元に戻す | `Ctrl+Z` | 編集系アプリ |
-| やり直し | `Ctrl+Y` | 編集系アプリ |
-| 検索 | `Ctrl+F` | 検索対応アプリ |
-| 置換 | `Ctrl+H` | 編集系アプリ |
-| ダークモード切替 | `Ctrl+D` | 全アプリ共通 |
-| 設定 | `Ctrl+,` | 設定があるアプリ |
-| 終了 | `Alt+F4` | Windows標準 |
+### Common Operations
+| Function | Shortcut | Notes |
+|----------|----------|-------|
+| New | `Ctrl+N` | All apps |
+| Open File | `Ctrl+O` | File-based apps |
+| Save | `Ctrl+S` | All apps |
+| Save As | `Ctrl+Shift+S` | All apps |
+| Undo | `Ctrl+Z` | Edit apps |
+| Redo | `Ctrl+Y` | Edit apps |
+| Find | `Ctrl+F` | Search-enabled apps |
+| Replace | `Ctrl+H` | Edit apps |
+| Toggle Dark Mode | `Ctrl+D` | All apps |
+| Settings | `Ctrl+,` | Apps with settings |
+| Exit | `Alt+F4` | Windows standard |
 
-### アプリ固有操作
-- 各アプリの主機能に`Ctrl+Enter`を割り当て
-- サブ機能は`Ctrl+数字`で配置
+### App-Specific Operations
+- Assign `Ctrl+Enter` to main app function
+- Sub-functions assigned to `Ctrl+number`
 
-## 📁 プロジェクト構造テンプレート
+## 📁 Project Structure Template
 
 ```
 app-name/
 ├── src/
-│   ├── main.ts           # メイン処理
-│   ├── styles.css        # スタイル定義
-│   └── types.ts          # 型定義
+│   ├── main.ts           # Main logic
+│   ├── styles.css        # Style definitions
+│   └── types.ts          # Type definitions
 ├── src-tauri/
 │   ├── src/
-│   │   └── main.rs       # Rustバックエンド
-│   ├── tauri.conf.json   # Tauri設定
-│   └── Cargo.toml        # Rust依存関係
-├── index.html            # メインHTML
-├── package.json          # Node.js依存関係
-├── tailwind.config.js    # Tailwind設定
-├── README.md             # 使用方法
-├── DESIGN_PHILOSOPHY.md  # 設計思想
-└── .gitignore           # Git設定
+│   │   └── main.rs       # Rust backend
+│   ├── tauri.conf.json   # Tauri configuration
+│   └── Cargo.toml        # Rust dependencies
+├── index.html            # Main HTML
+├── package.json          # Node.js dependencies
+├── tailwind.config.js    # Tailwind configuration
+├── README.md             # Usage instructions
+├── DESIGN_PHILOSOPHY.md  # Design philosophy
+└── .gitignore           # Git configuration
 ```
 
-## 🚀 アプリケーション一覧（予定）
+## 🚀 Application Roadmap
 
-### 🔧 ユーティリティ系
-- [x] **シンプルメモ帳** - テキスト編集特化
-- [ ] **時計・タイマー** - プレゼン展示向け大画面表示
-- [ ] **QRコード生成器** - テキスト/URL即座変換
-- [ ] **ハッシュ変換器** - MD5/SHA256/BASE64一括処理
-- [ ] **圧縮解凍ツール** - ドラッグ&ドロップ対応
+### 🔧 Utility Suite
+- [x] **Simple Notepad** - Text editing focused
+- [ ] **Clock & Timer** - Large display for presentations
+- [ ] **QR Code Generator** - Instant text/URL conversion
+- [ ] **Hash Converter** - MD5/SHA256/BASE64 batch processing
+- [ ] **Archive Tool** - Drag & drop compression/extraction
 
-### 🎨 クリエイティブ系
-- [ ] **シンプルペイント** - 透過PNG/ドット絵対応
-- [ ] **スクリーンショット** - 範囲指定/注釈機能
-- [ ] **作図ヘルパー** - 配線図/フローチャート特化
+### 🎨 Creative Suite
+- [ ] **Simple Paint** - Transparent PNG/pixel art support
+- [ ] **Screenshot Tool** - Area selection/annotation features
+- [ ] **Diagram Helper** - Wiring diagrams/flowcharts focused
 
-### 📁 メディア系
-- [ ] **画像ビューア** - 一括表示/サムネイル
-- [ ] **メディア変換器** - 動画/画像/音楽一括変換
-- [ ] **メディアプレイヤー** - 軽量再生
+### 📁 Media Suite
+- [ ] **Image Viewer** - Batch display/thumbnails
+- [ ] **Media Converter** - Video/image/audio batch conversion
+- [ ] **Media Player** - Lightweight playback
 
-### 📅 生産性系
-- [ ] **スケジュール** - トースト通知対応
-- [ ] **アプリランチャー** - キーボード操作特化
-- [ ] **ファイルクリーナー** - 不要データ検出削除
+### 📅 Productivity Suite
+- [ ] **Scheduler** - Toast notification support
+- [ ] **App Launcher** - Keyboard operation focused
+- [ ] **File Cleaner** - Unnecessary data detection/removal
 
-### 🔒 セキュリティ系
-- [ ] **ステガノグラフィ** - 画像内データ隠蔽
-- [ ] **ファイル暗号化** - AES256対応
+### 🔒 Security Suite
+- [ ] **Steganography** - Image data hiding
+- [ ] **File Encryption** - AES256 support
 
-## 💡 実装ガイドライン
+## 💡 Implementation Guidelines
 
-### 起動時の振る舞い
+### Startup Behavior
 ```typescript
-// ❌ 悪い例：履歴を表示
+// ❌ Bad example: Show history
 async function onAppStart() {
   showRecentFiles();
   loadLastSession();
 }
 
-// ✅ 良い例：新鮮な状態
+// ✅ Good example: Fresh state
 async function onAppStart() {
   initializeCleanState();
   focusMainInput();
 }
 ```
 
-### エラーハンドリング
+### Error Handling
 ```typescript
-// ユーザーフレンドリーなエラー表示
+// User-friendly error display
 function handleError(error: Error) {
   showToast({
     type: 'error',
-    message: '処理中にエラーが発生しました',
+    message: 'An error occurred during processing',
     detail: error.message,
     duration: 5000
   });
 }
 ```
 
-### パフォーマンス最適化
+### Performance Optimization
 ```typescript
-// 大量データ処理時のデバウンス
+// Debounce for large data processing
 const debouncedUpdate = debounce((data) => {
   updateUI(data);
 }, 100);
 ```
 
-## 🌍 多言語対応方針
+## 🌍 Internationalization Policy
 
-### 優先順位
-1. **日本語** - 第一言語
-2. **英語** - 国際対応
-3. **その他** - 需要に応じて
+### Priority Order
+1. **English** - Primary language
+2. **Japanese** - Secondary support
+3. **Others** - Based on demand
 
-### 実装方針
-- UI文字列は外部化
-- 絵文字アイコン多用で言語依存を減らす
-- 数値・記号は国際標準に準拠
+### Implementation Strategy
+- Externalize UI strings
+- Use emoji icons to reduce language dependency
+- Follow international standards for numbers/symbols
 
-## 📊 品質基準
+## 📊 Quality Standards
 
-### パフォーマンス指標
-- 起動時間: 3秒以内
-- メモリ使用量: 200MB以下
-- バイナリサイズ: 10MB以下
-- レスポンス時間: 100ms以内
+### Performance Metrics
+- Startup time: Within 3 seconds
+- Memory usage: Under 200MB
+- Binary size: Under 10MB
+- Response time: Within 100ms
 
-### 品質チェック項目
-- [ ] 全プラットフォーム動作確認
-- [ ] Raspberry Pi動作確認  
-- [ ] 大容量データ処理確認
-- [ ] メモリリーク確認
-- [ ] キーボードショートカット確認
-- [ ] ダークモード確認
-- [ ] 日本語入力確認
-
----
-
-## 🎊 開発フロー
-
-1. **コンセプト設計** - 単機能の明確化
-2. **UI/UXモックアップ** - 90%作業領域確保
-3. **プロトタイプ開発** - 核となる機能のみ
-4. **性能最適化** - Raspberry Pi基準
-5. **多プラットフォーム検証** - 全環境確認
-6. **ドキュメント整備** - README + 使用方法
-7. **リリース** - 単一実行ファイル配布
+### Quality Checklist
+- [ ] All platform operation verification
+- [ ] Raspberry Pi operation verification  
+- [ ] Large data processing verification
+- [ ] Memory leak verification
+- [ ] Keyboard shortcut verification
+- [ ] Dark mode verification
+- [ ] International input verification
 
 ---
 
-*この哲学に基づいて、本当に役立つシンプルなアプリを作り続けていきます。* 
+## 🎊 Development Flow
+
+1. **Concept Design** - Clarify single function
+2. **UI/UX Mockup** - Ensure 90% work area
+3. **Prototype Development** - Core functions only
+4. **Performance Optimization** - Raspberry Pi baseline
+5. **Multi-platform Verification** - All environment checks
+6. **Documentation** - README + usage instructions
+7. **Release** - Single executable distribution
+
+---
+
+*We continue creating truly useful, simple applications based on this philosophy.* 
