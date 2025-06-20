@@ -203,7 +203,7 @@ function generateJSONNotes(version, categories, breakingChanges, authors) {
   );
 
   if (majorCategories.length > 0) {
-    notes += '✨ What\\'s New:\\n';
+    notes += '✨ What\'s New:\\n';
     majorCategories.slice(0, 3).forEach(([, category]) => {
       const count = category.commits.length;
       notes += `• ${category.label}: ${count} improvement${count > 1 ? 's' : ''}\\n`;

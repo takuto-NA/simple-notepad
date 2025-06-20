@@ -1074,7 +1074,7 @@ class SimpleNotepad {
   private applyMobileFontSizeConstraints(fontSize: number): number {
     // モバイルデバイスの判定
     const isMobile = window.innerWidth <= 768;
-    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
     
     if (isMobile && isIOSSafari && fontSize < 16) {
       // iOS Safariで16px未満の場合はズーム防止のため16pxに設定

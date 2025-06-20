@@ -91,10 +91,6 @@ export default {
   'error.unsupportedFormat': 'サポートされていないファイル形式です',
   'error.emptyFilename': 'ファイル名を入力してください。',
   
-  // Search results
-  'search.notFound': '見つかりませんでした',
-  'search.results': '{current} / {total} 件',
-  
   // Web demo banner
   'banner.webDemo': '📱 これは体験版です • ファイル保存はダウンロードになります •',
   'banner.downloadLink': '完全版（デスクトップアプリ）をダウンロード',
