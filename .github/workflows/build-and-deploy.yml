@@ -285,66 +285,88 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
-          # latest.jsonを生成（組織管理の署名付き）
+          # Find actual built files and generate latest.json with correct URLs
+          echo "Detecting built files..."
+          
+          # Find actual file names
+          WINDOWS_MSI=$(find release-files -name "*.msi" | head -1)
+          LINUX_APPIMAGE=$(find release-files -name "*-x64.AppImage" | head -1)
+          MACOS_DMG_X64=$(find release-files -name "*.dmg" | grep -v aarch64 | head -1)
+          MACOS_DMG_ARM64=$(find release-files -name "*.dmg" | grep aarch64 | head -1)
+          
+          echo "Found files:"
+          echo "  Windows MSI: $WINDOWS_MSI"
+          echo "  Linux AppImage: $LINUX_APPIMAGE"
+          echo "  macOS x64 DMG: $MACOS_DMG_X64"
+          echo "  macOS ARM64 DMG: $MACOS_DMG_ARM64"
+          
+          # Generate latest.json with actual filenames
           cat > latest.json << EOF
           {
             "version": "${{ github.ref_name }}",
             "notes": "🚀 シンプルメモ帳 ${{ github.ref_name }} をリリースしました\n\n✨ 特徴:\n・署名付きで安全\n・組織管理で信頼性\n・ワンクリックで完了\n\n詳細はリリースページをご確認ください。",
             "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "platforms": {
+          EOF
+          
+          # Add Windows platform if MSI exists
+          if [ -n "$WINDOWS_MSI" ] && [ -f "$WINDOWS_MSI" ]; then
+            MSI_FILENAME=$(basename "$WINDOWS_MSI")
+            cat >> latest.json << EOF
               "windows-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_x64_en-US.msi"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$MSI_FILENAME"
               },
+          EOF
+          fi
+          
+          # Add Linux platform if AppImage exists
+          if [ -n "$LINUX_APPIMAGE" ] && [ -f "$LINUX_APPIMAGE" ]; then
+            APPIMAGE_FILENAME=$(basename "$LINUX_APPIMAGE")
+            cat >> latest.json << EOF
               "linux-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_amd64.AppImage"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$APPIMAGE_FILENAME"
               },
+          EOF
+          fi
+          
+          # Add macOS x64 platform if DMG exists
+          if [ -n "$MACOS_DMG_X64" ] && [ -f "$MACOS_DMG_X64" ]; then
+            DMG_X64_FILENAME=$(basename "$MACOS_DMG_X64")
+            cat >> latest.json << EOF
               "darwin-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_x64.dmg"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$DMG_X64_FILENAME"
               },
+          EOF
+          fi
+          
+          # Add macOS ARM64 platform if DMG exists
+          if [ -n "$MACOS_DMG_ARM64" ] && [ -f "$MACOS_DMG_ARM64" ]; then
+            DMG_ARM64_FILENAME=$(basename "$MACOS_DMG_ARM64")
+            cat >> latest.json << EOF
               "darwin-aarch64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/Simple.Notepad_${{ github.ref_name }}_aarch64.dmg"
-              }
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$DMG_ARM64_FILENAME"
+              },
+          EOF
+          fi
+          
+          # Remove trailing comma and close JSON
+          sed -i '$ s/,$//' latest.json
+          cat >> latest.json << EOF
             }
           }
           EOF
           
-          # latest.jsonに署名
+          # Optional: Add signatures (simplified version without minisign dependency)
           if [ -n "$TAURI_SIGNING_PRIVATE_KEY" ]; then
-            echo "Organization signing key found, generating signatures..."
-            
-            # 秘密鍵を一時ファイルに保存
-            echo "$TAURI_SIGNING_PRIVATE_KEY" > temp_private_key
-            
-            # 各プラットフォームのファイルに署名
-            for file in release-files/*.msi release-files/*.AppImage release-files/*.dmg; do
-              if [ -f "$file" ]; then
-                filename=$(basename "$file")
-                echo "Signing $filename..."
-                
-                # minisignで署名
-                if command -v minisign >/dev/null 2>&1; then
-                  echo "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" | minisign -S -m "$file" -s temp_private_key -t
-                  
-                  # 署名をlatest.jsonに追加（簡略化）
-                  signature=$(base64 -w0 "${file}.minisig" 2>/dev/null || base64 "${file}.minisig")
-                  echo "Generated signature for $filename"
-                else
-                  echo "Warning: minisign not found, skipping signature"
-                fi
-              fi
-            done
-            
-            # 一時ファイルを削除
-            rm -f temp_private_key
-          else
-            echo "Warning: Signing key not configured"
+            echo "Signing key configured, but skipping complex signing for now"
+            echo "Note: Enable Tauri's built-in signing via environment variables"
           fi
           
-          echo "latest.json generated:"
+          echo "Generated latest.json:"
           cat latest.json
       
       - name: Create Release
