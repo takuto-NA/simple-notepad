@@ -1286,17 +1286,17 @@ class SimpleNotepad {
   }
 
   private setupUpdateButton() {
-    // ツールバーに「ヘルプ」ボタンを追加（更新チェックも含む）
-    const toolbar = document.querySelector('.toolbar');
-    if (!toolbar) return;
+    // ツールバーの右側コントロール部分に「ヘルプ」ボタンを追加
+    const rightControls = document.querySelector('.toolbar .flex.items-center.space-x-1:last-child');
+    if (!rightControls) return;
 
     const helpButton = document.createElement('button');
-    helpButton.className = 'bg-transparent hover:bg-gray-200 dark:hover:bg-gray-700 rounded px-2 py-1 text-sm transition-colors';
+    helpButton.className = 'toolbar-btn';
     helpButton.innerHTML = '❓';
     helpButton.title = IS_TAURI ? 'ヘルプ・更新確認' : 'このアプリについて';
     helpButton.onclick = () => this.showHelpMenu();
     
-    toolbar.appendChild(helpButton);
+    rightControls.appendChild(helpButton);
   }
 
   private async showHelpMenu() {
