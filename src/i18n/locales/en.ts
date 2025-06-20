@@ -112,5 +112,22 @@ export default {
   
   // Search results
   'search.notFound': 'Not found',
-  'search.results': '{current} / {total} matches'
+  'search.results': '{current} / {total} matches',
+
+  // Drag and drop
+  'drop.textDropped': 'Text content detected. How would you like to handle it?',
+  'drop.replace': 'Replace all content',
+  'drop.append': 'Append to end',
+  'drop.insert': 'Insert at cursor position',
+  'drop.cancel': 'Cancel',
+  'drop.chooseOption': 'Choose an option (1-4):',
+  
+  // Drop status messages
+  'status.textPasted': 'Text content inserted',
+  'status.textDropped': 'Text content added successfully',
+  'status.unsupportedDrop': 'Unsupported content type',
+  'status.noTextInHTML': 'No text content found in HTML',
+  
+  // Additional confirmations
+  'confirm.replaceContent': 'This will replace all current content. Continue?'
 }; 

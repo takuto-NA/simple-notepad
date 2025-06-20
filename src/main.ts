@@ -582,9 +582,20 @@ class SimpleNotepad {
     const fontSizeMobile = document.getElementById('font-size-mobile') as HTMLSelectElement;
     this.state.fontSize = parseInt(fontSizeMobile.value);
     this.fontSizeSelect.value = fontSizeMobile.value; // Sync with desktop select
-    this.editor.style.fontSize = `${this.state.fontSize}px`;
+    
+    // iOS Safariズーム対策を適用
+    const effectiveFontSize = this.applyMobileFontSizeConstraints(this.state.fontSize);
+    this.editor.style.fontSize = `${effectiveFontSize}px`;
+    this.lineNumbers.style.fontSize = `${effectiveFontSize}px`;
+    
     this.updateLineNumbers();
-    this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に変更しました`;
+    
+    // ユーザーフィードバック
+    if (effectiveFontSize !== this.state.fontSize) {
+      this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に設定 (iOS Safariでは ${effectiveFontSize}px で表示)`;
+    } else {
+      this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に変更しました`;
+    }
   }
 
   private changeEncodingMobile() {
@@ -1044,10 +1055,35 @@ class SimpleNotepad {
     // Sync mobile select
     const fontSizeMobile = document.getElementById('font-size-mobile') as HTMLSelectElement;
     if (fontSizeMobile) fontSizeMobile.value = this.fontSizeSelect.value;
-    this.editor.style.fontSize = `${this.state.fontSize}px`;
-    this.lineNumbers.style.fontSize = `${this.state.fontSize}px`;
+    
+    // iOS Safariズーム対策: 16px未満の場合は強制的に16pxに設定
+    const effectiveFontSize = this.applyMobileFontSizeConstraints(this.state.fontSize);
+    this.editor.style.fontSize = `${effectiveFontSize}px`;
+    this.lineNumbers.style.fontSize = `${effectiveFontSize}px`;
+    
     this.debounce('lineNumbers', () => this.updateLineNumbers(), 100);
-    this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に変更しました`;
+    
+    // ユーザーフィードバック
+    if (effectiveFontSize !== this.state.fontSize) {
+      this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に設定 (モバイルでは ${effectiveFontSize}px で表示)`;
+    } else {
+      this.statusText.textContent = `フォントサイズを ${this.state.fontSize}px に変更しました`;
+    }
+  }
+
+  private applyMobileFontSizeConstraints(fontSize: number): number {
+    // モバイルデバイスの判定
+    const isMobile = window.innerWidth <= 768;
+    const isIOSSafari = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    if (isMobile && isIOSSafari && fontSize < 16) {
+      // iOS Safariで16px未満の場合はズーム防止のため16pxに設定
+      this.editor.setAttribute('data-font-size-small', 'true');
+      return 16;
+    } else {
+      this.editor.removeAttribute('data-font-size-small');
+      return fontSize;
+    }
   }
 
   private updateLineNumbers() {
@@ -1243,11 +1279,165 @@ class SimpleNotepad {
     });
 
     dropArea.addEventListener('drop', (e) => {
-      const files = Array.from((e as DragEvent).dataTransfer?.files || []);
-      if (files.length > 0) {
-        this.loadDroppedFile(files[0]);
-      }
+      this.handleDrop(e as DragEvent);
     });
+  }
+
+  private handleDrop(e: DragEvent) {
+    const dataTransfer = e.dataTransfer;
+    if (!dataTransfer) return;
+
+    // Check for files first (existing functionality)
+    const files = Array.from(dataTransfer.files || []);
+    if (files.length > 0) {
+      this.loadDroppedFile(files[0]);
+      return;
+    }
+
+    // Check for text data
+    const textData = dataTransfer.getData('text/plain');
+    if (textData) {
+      this.handleDroppedText(textData);
+      return;
+    }
+
+    // Check for HTML data (extract text content)
+    const htmlData = dataTransfer.getData('text/html');
+    if (htmlData) {
+      this.handleDroppedHTML(htmlData);
+      return;
+    }
+
+    // Check for URLs
+    const urlData = dataTransfer.getData('text/uri-list');
+    if (urlData) {
+      this.handleDroppedURL(urlData);
+      return;
+    }
+
+    // If no recognized data type, show message
+    this.statusText.textContent = i18n.t('status.unsupportedDrop');
+  }
+
+  private handleDroppedText(text: string) {
+    // If editor is empty, just insert the text
+    if (!this.state.content.trim()) {
+      this.insertTextAtPosition(text, 0);
+      this.statusText.textContent = i18n.t('status.textPasted');
+      return;
+    }
+
+    // If editor has content, ask user what to do
+    const options = [
+      i18n.t('drop.replace'), // Replace all content
+      i18n.t('drop.append'),  // Append to end
+      i18n.t('drop.insert'),  // Insert at cursor
+      i18n.t('drop.cancel')   // Cancel
+    ];
+
+    // Simple confirmation dialog for now (could be improved with custom modal)
+    const choice = prompt(
+      i18n.t('drop.textDropped') + '\n\n' +
+      '1. ' + options[0] + '\n' +
+      '2. ' + options[1] + '\n' +
+      '3. ' + options[2] + '\n' +
+      '4. ' + options[3] + '\n\n' +
+      i18n.t('drop.chooseOption'),
+      '3'
+    );
+
+    switch (choice) {
+      case '1': // Replace
+        if (this.state.modified && !confirm(i18n.t('confirm.replaceContent'))) return;
+        this.replaceAllContent(text);
+        break;
+      case '2': // Append
+        this.appendText(text);
+        break;
+      case '3': // Insert at cursor
+      default:
+        this.insertTextAtCursor(text);
+        break;
+      case '4': // Cancel
+        return;
+    }
+
+    this.statusText.textContent = i18n.t('status.textDropped');
+  }
+
+  private handleDroppedHTML(html: string) {
+    // Extract text content from HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const text = tempDiv.textContent || tempDiv.innerText || '';
+    
+    if (text.trim()) {
+      this.handleDroppedText(text);
+    } else {
+      this.statusText.textContent = i18n.t('status.noTextInHTML');
+    }
+  }
+
+  private handleDroppedURL(url: string) {
+    // Handle multiple URLs (separated by newlines)
+    const urls = url.split('\n').filter(u => u.trim());
+    const urlText = urls.join('\n');
+    
+    this.handleDroppedText(urlText);
+  }
+
+  private insertTextAtPosition(text: string, position: number) {
+    const currentValue = this.editor.value;
+    const newValue = currentValue.slice(0, position) + text + currentValue.slice(position);
+    
+    this.updateEditorContent(newValue);
+    
+    // Set cursor after inserted text
+    const newCursorPos = position + text.length;
+    this.editor.setSelectionRange(newCursorPos, newCursorPos);
+    this.editor.focus();
+  }
+
+  private insertTextAtCursor(text: string) {
+    const cursorPos = this.editor.selectionStart;
+    this.insertTextAtPosition(text, cursorPos);
+  }
+
+  private appendText(text: string) {
+    const currentValue = this.editor.value;
+    const separator = currentValue && !currentValue.endsWith('\n') ? '\n' : '';
+    const newValue = currentValue + separator + text;
+    
+    this.updateEditorContent(newValue);
+    
+    // Set cursor at end
+    this.editor.setSelectionRange(newValue.length, newValue.length);
+    this.editor.focus();
+  }
+
+  private replaceAllContent(text: string) {
+    this.updateEditorContent(text);
+    
+    // Set cursor at start
+    this.editor.setSelectionRange(0, 0);
+    this.editor.focus();
+    
+    // Clear file path since this is new content
+    this.state.filePath = null;
+  }
+
+  private updateEditorContent(newContent: string) {
+    this.state.content = newContent;
+    this.editor.value = newContent;
+    this.state.modified = true;
+    
+    // Add to undo stack
+    this.addToUndoStack();
+    
+    // Update UI
+    this.updateDisplay();
+    this.updateLineNumbers();
+    this.updateToolbarState();
   }
 
   private loadDroppedFile(file: File) {

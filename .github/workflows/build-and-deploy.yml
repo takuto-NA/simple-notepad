@@ -227,6 +227,16 @@ jobs:
         with:
           version: latest
       
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # タグから "v" プレフィックスを削除してバージョンを抽出
+          VERSION=${GITHUB_REF_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag_name=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
+          echo "📋 抽出されたバージョン: $VERSION"
+          echo "🏷️ タグ名: $GITHUB_REF_NAME"
+      
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -280,6 +290,30 @@ jobs:
           echo "Release files prepared:"
           ls -la release-files/
       
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Generate automatic release notes from git commits
+          echo "📝 Generating release notes from git history..."
+          
+          # Install dependencies for the script
+          pnpm install
+          
+          # Generate release notes
+          RELEASE_NOTES_JSON=$(node scripts/generate-release-notes.js ${{ steps.extract_version.outputs.tag_name }} json)
+          RELEASE_NOTES_MARKDOWN=$(node scripts/generate-release-notes.js ${{ steps.extract_version.outputs.tag_name }} github)
+          
+          # Escape for JSON
+          RELEASE_NOTES_JSON_ESCAPED=$(echo "$RELEASE_NOTES_JSON" | sed 's/"/\\"/g' | tr '\n' ' ')
+          
+          # Set outputs
+          echo "json_notes=$RELEASE_NOTES_JSON_ESCAPED" >> $GITHUB_OUTPUT
+          echo "markdown_notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES_MARKDOWN" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          
+          echo "✅ Release notes generated successfully"
+
       - name: Generate latest.json for auto-updater
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -300,11 +334,11 @@ jobs:
           echo "  macOS x64 DMG: $MACOS_DMG_X64"
           echo "  macOS ARM64 DMG: $MACOS_DMG_ARM64"
           
-          # Generate latest.json with actual filenames
+          # Generate latest.json with actual filenames and auto-generated release notes
           cat > latest.json << EOF
           {
-            "version": "${{ github.ref_name }}",
-            "notes": "🚀 シンプルメモ帳 ${{ github.ref_name }} をリリースしました\n\n✨ 特徴:\n・署名付きで安全\n・組織管理で信頼性\n・ワンクリックで完了\n\n詳細はリリースページをご確認ください。",
+            "version": "${{ steps.extract_version.outputs.tag_name }}",
+            "notes": "${{ steps.release_notes.outputs.json_notes }}",
             "pub_date": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
             "platforms": {
           EOF
@@ -315,7 +349,7 @@ jobs:
             cat >> latest.json << EOF
               "windows-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$MSI_FILENAME"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ steps.extract_version.outputs.tag_name }}/$MSI_FILENAME"
               },
           EOF
           fi
@@ -326,7 +360,7 @@ jobs:
             cat >> latest.json << EOF
               "linux-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$APPIMAGE_FILENAME"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ steps.extract_version.outputs.tag_name }}/$APPIMAGE_FILENAME"
               },
           EOF
           fi
@@ -337,7 +371,7 @@ jobs:
             cat >> latest.json << EOF
               "darwin-x86_64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$DMG_X64_FILENAME"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ steps.extract_version.outputs.tag_name }}/$DMG_X64_FILENAME"
               },
           EOF
           fi
@@ -348,7 +382,7 @@ jobs:
             cat >> latest.json << EOF
               "darwin-aarch64": {
                 "signature": "",
-                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ github.ref_name }}/$DMG_ARM64_FILENAME"
+                "url": "https://github.com/takuto-NA/simple-notepad/releases/download/${{ steps.extract_version.outputs.tag_name }}/$DMG_ARM64_FILENAME"
               },
           EOF
           fi
@@ -372,37 +406,9 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          body: |
-            🚀 シンプルメモ帳 ${{ github.ref_name }} をリリースしました
-            
-            ## 💾 ダウンロード
-            - **Windows**: `.msi` または `.exe` ファイル
-            - **macOS**: `.dmg` または `.app.tar.gz` ファイル  
-            - **Linux (x64)**: `*-x64.deb` または `*-x64.AppImage` ファイル
-            - **🍓 Raspberry Pi 4+ (ARM64)**: `*-arm64.deb` または `*-arm64.AppImage` ファイル
-            - **🍓 Raspberry Pi 3+ (ARMv7)**: `*-armv7.deb` または `*-armv7.AppImage` ファイル
-            
-            ## 🌐 Web体験版
-            [ブラウザで今すぐ試す](https://takuto-na.github.io/simple-notepad/)
-            
-            ## 📱 モバイル対応
-            このバージョンではスマホ・タブレット対応が改善されました！
-            
-            ## 🍓 Raspberry Pi対応
-            - **Pi 4以降**: ARM64版を推奨（高性能）
-            - **Pi 3以降**: ARMv7版も利用可能
-            - **推奨**: 4GB RAM以上のモデル
-            
-            ## 🛠️ インストール方法
-            1. お使いのOSに対応したファイルをダウンロード
-            2. ダウンロードしたファイルを実行してインストール
-            3. 「シンプルメモ帳」を起動して利用開始！
-            
-            ## 🚀 自動更新
-            このバージョンから、組織管理の署名付き自動更新機能を搭載しました！
-            アプリ内で新しいバージョンが通知され、ワンクリックで安全に更新できます。
+          tag_name: ${{ steps.extract_version.outputs.tag_name }}
+          name: Release ${{ steps.extract_version.outputs.tag_name }}
+          body: ${{ steps.release_notes.outputs.markdown_notes }}
           files: |
             release-files/*
             latest.json

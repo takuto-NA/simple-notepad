@@ -15,8 +15,15 @@
     "preview": "vite preview",
     "preview:web": "vite preview --base=/memo/",
     "tauri": "tauri",
-    "validate-translations": "node scripts/validate-translations.js",
-    "validate-translation": "node scripts/validate-translations.js"
+    "validate-translations": "node scripts/validate-translations.cjs",
+    "validate-translation": "node scripts/validate-translations.cjs",
+    "validate-zh": "node scripts/validate-translations.cjs zh",
+    "validate-es": "node scripts/validate-translations.cjs es", 
+    "validate-fr": "node scripts/validate-translations.cjs fr",
+    "update-version": "node scripts/update-version.js",
+    "version-check": "node scripts/update-version.js",
+    "release-notes": "node scripts/generate-release-notes.js",
+    "preview-release": "node scripts/generate-release-notes.js"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",

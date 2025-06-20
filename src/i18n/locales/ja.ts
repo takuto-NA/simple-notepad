@@ -113,5 +113,26 @@ export default {
   'a11y.menuCollapsed': 'メニューが折りたたまれました',
   'a11y.searchActive': '検索モードがアクティブです',
   'a11y.darkModeOn': 'ダークモードがオンです',
-  'a11y.darkModeOff': 'ダークモードがオフです'
+  'a11y.darkModeOff': 'ダークモードがオフです',
+
+  // Search results
+  'search.notFound': '見つかりません',
+  'search.results': '{current} / {total} 件目',
+
+  // Drag and drop
+  'drop.textDropped': 'テキストが検出されました。どのように処理しますか？',
+  'drop.replace': 'すべて置き換え',
+  'drop.append': '末尾に追加',
+  'drop.insert': 'カーソル位置に挿入',
+  'drop.cancel': 'キャンセル',
+  'drop.chooseOption': 'オプションを選択してください (1-4):',
+  
+  // Drop status messages
+  'status.textPasted': 'テキストが挿入されました',
+  'status.textDropped': 'テキストが正常に追加されました',
+  'status.unsupportedDrop': 'サポートされていないコンテンツタイプです',
+  'status.noTextInHTML': 'HTMLにテキストコンテンツが見つかりません',
+  
+  // Additional confirmations
+  'confirm.replaceContent': '現在の内容がすべて置き換えられます。続行しますか？'
 }; 

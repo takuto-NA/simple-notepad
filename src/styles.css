@@ -476,7 +476,13 @@
   
   /* モバイルでのフォントサイズ調整 */
   .editor {
-    font-size: 16px !important; /* iOS Safariでのズーム防止 */
+    /* iOS Safariでのズーム防止: 最小フォントサイズを16pxに設定しつつ、ユーザー設定を許可 */
+    min-font-size: 16px;
+  }
+  
+  /* フォントサイズが16px未満の場合のみズーム防止を適用 */
+  .editor[data-font-size-small="true"] {
+    font-size: 16px !important;
   }
   
   /* スクロールエリアの調整 */

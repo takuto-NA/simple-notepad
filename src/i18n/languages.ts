@@ -19,41 +19,41 @@ export interface Languages {
 // Add new languages here when creating new translation files
 export const availableLanguages: LanguageInfo[] = [
   {
-    code: 'ja',
-    name: 'Japanese',
-    nativeName: '日本語',
-    country: 'JP'
-  },
-  {
     code: 'en',
     name: 'English',
     nativeName: 'English',
     country: 'US'
+  },
+  {
+    code: 'zh',
+    name: 'Chinese (Simplified)',
+    nativeName: '中文（简体）',
+    country: 'CN'
+  },
+  {
+    code: 'es',
+    name: 'Spanish',
+    nativeName: 'Español',
+    country: 'ES'
+  },
+  {
+    code: 'fr',
+    name: 'French',
+    nativeName: 'Français',
+    country: 'FR'
+  },
+  {
+    code: 'ja',
+    name: 'Japanese',
+    nativeName: '日本語',
+    country: 'JP'
   }
-  // Add new languages here:
-  // {
-  //   code: 'fr',
-  //   name: 'French',
-  //   nativeName: 'Français',
-  //   country: 'FR'
-  // },
+  // Future languages to add:
   // {
   //   code: 'de',
   //   name: 'German', 
   //   nativeName: 'Deutsch',
   //   country: 'DE'
-  // },
-  // {
-  //   code: 'es',
-  //   name: 'Spanish',
-  //   nativeName: 'Español',
-  //   country: 'ES'
-  // },
-  // {
-  //   code: 'zh',
-  //   name: 'Chinese',
-  //   nativeName: '中文',
-  //   country: 'CN'
   // },
   // {
   //   code: 'ko',
@@ -67,25 +67,42 @@ export const availableLanguages: LanguageInfo[] = [
   //   nativeName: 'العربية',
   //   country: 'SA',
   //   rtl: true
+  // },
+  // {
+  //   code: 'pt',
+  //   name: 'Portuguese',
+  //   nativeName: 'Português',
+  //   country: 'BR'
+  // },
+  // {
+  //   code: 'ru',
+  //   name: 'Russian',
+  //   nativeName: 'Русский',
+  //   country: 'RU'
   // }
 ];
 
 // Import all translation files
-import ja from './locales/ja';
 import en from './locales/en';
+import zh from './locales/zh';
+import es from './locales/es';
+import fr from './locales/fr';
+import ja from './locales/ja';
 
 // Translation registry
 // Add new translations here when creating new language files
 export const translations: Languages = {
-  ja,
-  en
-  // Add new translations here:
-  // fr,
+  en,
+  zh,
+  es,
+  fr,
+  ja
+  // Future translations to add:
   // de,
-  // es,
-  // zh,
   // ko,
-  // ar
+  // ar,
+  // pt,
+  // ru
 };
 
 // Helper function to get language info by code
