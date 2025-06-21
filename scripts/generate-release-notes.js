@@ -103,7 +103,7 @@ function getCommitsSinceLastTag(currentTag) {
   try {
     // Get previous tag
     const previousTag = execSync(
-      'git describe --tags --abbrev=0 HEAD^', 
+      `git tag --sort=-version:refname | grep -A1 "^${currentTag}$" | tail -1`, 
       { encoding: 'utf8' }
     ).trim();
 
@@ -112,7 +112,7 @@ function getCommitsSinceLastTag(currentTag) {
 
     // Get commits from previous tag to current tag
     const commits = execSync(
-      `git log ${previousTag}..HEAD --pretty=format:"%H|%s|%an|%ad" --date=short`,
+      `git log ${previousTag}..${currentTag} --pretty=format:"%H|%s|%an|%ad" --date=short`,
       { encoding: 'utf8' }
     );
 
