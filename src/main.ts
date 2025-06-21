@@ -258,7 +258,8 @@ class SimpleNotepad {
       { id: 'replace-btn', key: 'toolbar.replace' },
       { id: 'toggle-line-numbers', key: 'toolbar.lineNumbers' },
       { id: 'toggle-wrap', key: 'toolbar.wordWrap' },
-      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' }
+      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' },
+      { id: 'language-toggle', key: 'toolbar.language' }
     ];
     
     tooltipElements.forEach(({ id, key }) => {
@@ -369,8 +370,12 @@ class SimpleNotepad {
   }
 
   private toggleLanguage() {
+    // Cycle through all available languages instead of just EN/JA
     const currentLang = i18n.getCurrentLanguage();
-    const newLang = currentLang === 'ja' ? 'en' : 'ja';
+    const languages = i18n.getAvailableLanguages();
+    const currentIndex = languages.findIndex(lang => lang.code === currentLang);
+    const nextIndex = (currentIndex + 1) % languages.length;
+    const newLang = languages[nextIndex].code;
     this.changeLanguage(newLang);
   }
 
@@ -379,6 +384,7 @@ class SimpleNotepad {
     this.updateAllTexts();
     this.updateLanguageSelectors();
     this.updateDocumentLanguage();
+    this.updateDisplay(); // Update status bar and file info
     const currentLangCode = i18n.getCurrentLanguage();
     const langInfo = availableLanguages.find(lang => lang.code === currentLangCode);
     const langName = langInfo ? langInfo.nativeName : currentLangCode;
@@ -393,6 +399,13 @@ class SimpleNotepad {
   private updateLanguageSelectors() {
     const currentLang = i18n.getCurrentLanguage();
     const languageMobile = document.getElementById('language-select-mobile') as HTMLSelectElement;
+    const currentLanguageDisplay = document.getElementById('current-language-display');
+    
+    // Update desktop language display
+    if (currentLanguageDisplay) {
+      const langInfo = i18n.getAvailableLanguages().find(lang => lang.code === currentLang);
+      currentLanguageDisplay.textContent = langInfo ? langInfo.code.toUpperCase() : currentLang.toUpperCase();
+    }
     
     // Update mobile selector
     if (languageMobile) {

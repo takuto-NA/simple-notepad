@@ -26,7 +26,7 @@ export default defineConfig(async () => ({
     clearScreen: false,
     // Build optimization
     build: {
-      minify: 'terser',
+      minify: 'esbuild',
       rollupOptions: {
         output: {
           manualChunks: undefined,
