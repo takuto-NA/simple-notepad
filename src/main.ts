@@ -7,7 +7,7 @@ const IS_TAURI = typeof window !== 'undefined' &&
                  !__IS_WEB_BUILD__;
 
 // Import i18n system
-import { availableLanguages, translations, isLanguageSupported, getFallbackChain } from './i18n/languages';
+import { availableLanguages, translations, isLanguageSupported } from './i18n/languages';
 import type { LanguageInfo } from './i18n/languages';
 
 // Import auto-update functionality (Tauri版のみ)
