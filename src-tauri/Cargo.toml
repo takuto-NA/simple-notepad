@@ -1,6 +1,6 @@
 [package]
 name = "simple-notepad"
-version = "1.4.0"
+version = "1.4.1"
 description = "シンプルメモ帳 - Pure Function Apps"
 authors = ["Pure Function Apps"]
 edition = "2021"
