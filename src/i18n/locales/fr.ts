@@ -130,5 +130,21 @@ export default {
   'status.noTextInHTML': 'Aucun contenu textuel trouvé dans le HTML',
   
   // Additional confirmations
-  'confirm.replaceContent': 'Ceci remplacera tout le contenu actuel. Continuer ?'
+  'confirm.replaceContent': 'Ceci remplacera tout le contenu actuel. Continuer ?',
+  
+  // Drag and drop messages
+  'drag.dropFile': '📁 Déposer un fichier pour ouvrir',
+  'drag.dropTextFile': '📄 Déposer un fichier texte pour ouvrir',
+  'drag.dropAnyFile': '📄 Déposer tout fichier à lire comme texte',
+  'drag.dropText': '📝 Déposer du texte pour insérer',
+  'drag.dropUrl': '🔗 Déposer une URL pour insérer',
+  'drag.dropImage': '🖼️ Déposer une image pour extraire le texte',
+  
+  // File loading status
+  'status.loading': 'Chargement de {filename}...',
+  'status.loadCancelled': 'Chargement de fichier annulé',
+  'status.binaryFileLoaded': 'Fichier binaire chargé: {filename} (peut contenir des caractères illisibles)',
+  
+  // Binary file confirmation
+  'confirm.binaryFile': 'Le fichier "{filename}" semble contenir des données binaires. Il pourrait ne pas s\'afficher correctement en tant que texte. Continuer quand même ?'
 };

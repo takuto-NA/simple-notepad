@@ -83,11 +83,13 @@
             
             <div class="hidden lg:block toolbar-separator"></div>
             
-            <!-- Language Toggle -->
-            <button id="language-toggle" class="toolbar-btn flex items-center space-x-1" title="Language">
-              <span>🌐</span>
-              <span id="current-language-display" class="text-xs font-medium"></span>
-            </button>
+            <!-- Language Dropdown -->
+            <div class="flex items-center space-x-2">
+              <span class="text-xs text-gray-600 dark:text-gray-400">🌐</span>
+              <select id="language-select" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded px-2 py-1 text-gray-700 dark:text-gray-200">
+                <!-- Options will be populated dynamically -->
+              </select>
+            </div>
             
             <!-- Dark Mode Toggle -->
             <button id="dark-mode-toggle" class="toolbar-btn icon-theme" title="ダークモード切り替え (Ctrl+D)"></button>
@@ -278,6 +280,6 @@
     </div>
 
     <!-- Hidden file input for opening files -->
-    <input type="file" id="file-input" accept=".txt,.md,.js,.ts,.json,.html,.css,.py,.c,.cpp,.java,.xml,.csv,.log" style="display: none;">
+    <input type="file" id="file-input" style="display: none;">
   </body>
 </html>

@@ -507,3 +507,135 @@
     display: none;
   }
 }
+
+/* === Drag and Drop Interface === */
+.drop-area {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+/* Drag overlay that appears when dragging files */
+.drop-area::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(59, 130, 246, 0.1);
+  border: 2px dashed rgba(59, 130, 246, 0.3);
+  border-radius: 8px;
+  opacity: 0;
+  visibility: hidden;
+  z-index: 10;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+
+.drop-area::after {
+  content: attr(data-drop-message);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(59, 130, 246, 0.95);
+  color: white;
+  padding: 16px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 11;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Active drag state */
+.drop-area.dragover::before {
+  opacity: 1;
+  visibility: visible;
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
+.drop-area.dragover::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dark mode drag and drop */
+.dark .drop-area::before {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.dark .drop-area.dragover::before {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.7);
+}
+
+.dark .drop-area::after {
+  background: rgba(59, 130, 246, 0.9);
+}
+
+/* Drag cursor styling */
+.drop-area.dragover {
+  cursor: copy;
+}
+
+/* File type specific styling */
+.drop-area[data-drag-type="text"]::after {
+  background: rgba(34, 197, 94, 0.95);
+}
+
+.drop-area[data-drag-type="file"]::after {
+  background: rgba(59, 130, 246, 0.95);
+}
+
+.drop-area[data-drag-type="url"]::after {
+  background: rgba(168, 85, 247, 0.95);
+}
+
+.drop-area[data-drag-type="image"]::after {
+  background: rgba(239, 68, 68, 0.95);
+}
+
+.dark .drop-area[data-drag-type="text"]::after {
+  background: rgba(34, 197, 94, 0.9);
+}
+
+.dark .drop-area[data-drag-type="file"]::after {
+  background: rgba(59, 130, 246, 0.9);
+}
+
+.dark .drop-area[data-drag-type="url"]::after {
+  background: rgba(168, 85, 247, 0.9);
+}
+
+.dark .drop-area[data-drag-type="image"]::after {
+  background: rgba(239, 68, 68, 0.9);
+}
+
+/* Animation for drop success */
+@keyframes dropSuccess {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+.drop-area.drop-success::after {
+  animation: dropSuccess 0.3s ease;
+  background: rgba(34, 197, 94, 0.95) !important;
+  content: '✅ Dropped successfully!';
+}
+
+/* Prevent text selection during drag */
+.drop-area.dragover * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}

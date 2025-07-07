@@ -130,5 +130,21 @@ export default {
   'status.noTextInHTML': 'HTMLにテキストコンテンツが見つかりません',
   
   // Additional confirmations
-  'confirm.replaceContent': '現在の内容がすべて置き換えられます。続行しますか？'
+  'confirm.replaceContent': '現在の内容がすべて置き換えられます。続行しますか？',
+  
+  // Drag and drop messages
+  'drag.dropFile': '📁 ファイルをドロップして開く',
+  'drag.dropTextFile': '📄 テキストファイルをドロップして開く',
+  'drag.dropAnyFile': '📄 任意のファイルをテキストとして読み込み',
+  'drag.dropText': '📝 テキストをドロップして挿入',
+  'drag.dropUrl': '🔗 URLをドロップして挿入',
+  'drag.dropImage': '🖼️ 画像をドロップしてテキストを抽出',
+  
+  // File loading status
+  'status.loading': '{filename}を読み込み中...',
+  'status.loadCancelled': 'ファイルの読み込みをキャンセルしました',
+  'status.binaryFileLoaded': 'バイナリファイルを読み込みました: {filename} (読めない文字が含まれる可能性があります)',
+  
+  // Binary file confirmation
+  'confirm.binaryFile': 'ファイル"{filename}"はバイナリデータを含んでいるようです。テキストとして正しく表示されない可能性があります。続行しますか？'
 }; 

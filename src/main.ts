@@ -30,16 +30,8 @@ class I18n {
       return savedLang;
     }
     
-    // Auto-detect from browser language
-    const browserLang = navigator.language.toLowerCase();
-    
-    // Use fallback chain for better language matching
-    const fallbackChain = getFallbackChain(browserLang);
-    if (fallbackChain.length > 0) {
-      return fallbackChain[0];
-    }
-    
-    // Final fallback
+    // Default to English unless user has previously set a preference
+    // Auto-detection is disabled by default for predictable behavior
     return this.fallbackLanguage;
   }
   
@@ -258,8 +250,7 @@ class SimpleNotepad {
       { id: 'replace-btn', key: 'toolbar.replace' },
       { id: 'toggle-line-numbers', key: 'toolbar.lineNumbers' },
       { id: 'toggle-wrap', key: 'toolbar.wordWrap' },
-      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' },
-      { id: 'language-toggle', key: 'toolbar.language' }
+      { id: 'dark-mode-toggle', key: 'toolbar.darkMode' }
     ];
     
     tooltipElements.forEach(({ id, key }) => {
@@ -369,14 +360,9 @@ class SimpleNotepad {
     }
   }
 
-  private toggleLanguage() {
-    // Cycle through all available languages instead of just EN/JA
-    const currentLang = i18n.getCurrentLanguage();
-    const languages = i18n.getAvailableLanguages();
-    const currentIndex = languages.findIndex(lang => lang.code === currentLang);
-    const nextIndex = (currentIndex + 1) % languages.length;
-    const newLang = languages[nextIndex].code;
-    this.changeLanguage(newLang);
+  private changeLanguageDesktop() {
+    const languageSelect = document.getElementById('language-select') as HTMLSelectElement;
+    this.changeLanguage(languageSelect.value);
   }
 
   private changeLanguage(languageCode: string) {
@@ -398,13 +384,24 @@ class SimpleNotepad {
 
   private updateLanguageSelectors() {
     const currentLang = i18n.getCurrentLanguage();
+    const languageSelect = document.getElementById('language-select') as HTMLSelectElement;
     const languageMobile = document.getElementById('language-select-mobile') as HTMLSelectElement;
-    const currentLanguageDisplay = document.getElementById('current-language-display');
     
-    // Update desktop language display
-    if (currentLanguageDisplay) {
-      const langInfo = i18n.getAvailableLanguages().find(lang => lang.code === currentLang);
-      currentLanguageDisplay.textContent = langInfo ? langInfo.code.toUpperCase() : currentLang.toUpperCase();
+    // Update desktop language dropdown
+    if (languageSelect) {
+      // Clear existing options
+      languageSelect.innerHTML = '';
+      
+      // Add all available languages
+      i18n.getAvailableLanguages().forEach(lang => {
+        const option = document.createElement('option');
+        option.value = lang.code;
+        option.textContent = lang.nativeName;
+        if (lang.code === currentLang) {
+          option.selected = true;
+        }
+        languageSelect.appendChild(option);
+      });
     }
     
     // Update mobile selector
@@ -477,8 +474,8 @@ class SimpleNotepad {
     document.getElementById('toggle-wrap')!.addEventListener('click', () => this.toggleWordWrap());
     this.darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
 
-    // Language Toggle
-    document.getElementById('language-toggle')!.addEventListener('click', () => this.toggleLanguage());
+    // Language Dropdown
+    document.getElementById('language-select')!.addEventListener('change', () => this.changeLanguageDesktop());
 
     // Mobile Menu Toggle
     document.getElementById('mobile-menu-btn')!.addEventListener('click', () => this.toggleMobileMenu());
@@ -826,24 +823,11 @@ class SimpleNotepad {
     const file = (e.target as HTMLInputElement).files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      this.state.content = e.target?.result as string;
-      this.state.filePath = file.name;
-      this.state.modified = false;
-      this.state.undoStack = [this.state.content];
-      this.state.redoStack = [];
-      this.editor.value = this.state.content;
-      
-      // Auto-detect encoding (simplified)
-      this.detectEncoding(file);
-      
-      this.updateDisplay();
-      this.updateLineNumbers();
-      this.updateToolbarState();
-      this.statusText.textContent = `ファイル "${file.name}" を開きました (${this.state.encoding})`;
-    };
-    reader.readAsText(file, this.state.encoding);
+    // Use the same loading logic as drag and drop
+    this.loadDroppedFile(file);
+    
+    // Reset the file input so the same file can be selected again
+    (e.target as HTMLInputElement).value = '';
   }
 
   private detectEncoding(file: File) {
@@ -1270,33 +1254,99 @@ class SimpleNotepad {
   }
 
   private setupDragAndDrop() {
-    const dropArea = document.querySelector('.drop-area')!;
+    const dropArea = document.querySelector('.drop-area')! as HTMLElement;
     
+    // Prevent default drag behaviors on document
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      document.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+      
       dropArea.addEventListener(eventName, (e) => {
         e.preventDefault();
         e.stopPropagation();
       });
     });
 
-    ['dragenter', 'dragover'].forEach(eventName => {
-      dropArea.addEventListener(eventName, () => {
-        dropArea.classList.add('dragover');
-      });
+    // Handle drag enter - detect content type and set appropriate message
+    dropArea.addEventListener('dragenter', (e) => {
+      const dataTransfer = (e as DragEvent).dataTransfer;
+      if (!dataTransfer) return;
+      
+      this.handleDragEnter(dropArea, dataTransfer);
     });
 
-    ['dragleave', 'drop'].forEach(eventName => {
-      dropArea.addEventListener(eventName, () => {
-        dropArea.classList.remove('dragover');
-      });
+    // Handle drag over - maintain drag state
+    dropArea.addEventListener('dragover', (e) => {
+      dropArea.classList.add('dragover');
+      const dataTransfer = (e as DragEvent).dataTransfer;
+      if (dataTransfer) {
+        // Set the visual feedback for the drag operation
+        dataTransfer.dropEffect = 'copy';
+      }
     });
 
+    // Handle drag leave - only remove dragover if actually leaving the drop area
+    dropArea.addEventListener('dragleave', (e) => {
+      const rect = dropArea.getBoundingClientRect();
+      const x = (e as DragEvent).clientX;
+      const y = (e as DragEvent).clientY;
+      
+      // Only remove dragover if mouse is outside the drop area
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        this.handleDragLeave(dropArea);
+      }
+    });
+
+    // Handle drop
     dropArea.addEventListener('drop', (e) => {
-      this.handleDrop(e as DragEvent);
+      this.handleDragLeave(dropArea);
+      this.handleDrop(e as DragEvent, dropArea);
     });
   }
 
-  private handleDrop(e: DragEvent) {
+  private handleDragEnter(dropArea: HTMLElement, dataTransfer: DataTransfer) {
+    dropArea.classList.add('dragover');
+    
+    // Detect what type of content is being dragged
+    const files = dataTransfer.files;
+    const types = dataTransfer.types;
+    
+    let dragType = 'file';
+    let message = i18n.t('drag.dropFile');
+    
+    if (files && files.length > 0) {
+      const file = files[0];
+      if (file.type.startsWith('image/')) {
+        dragType = 'image';
+        message = i18n.t('drag.dropImage');
+      } else if (this.isTextReadableFile(file)) {
+        dragType = 'file';
+        message = i18n.t('drag.dropTextFile');
+      } else {
+        dragType = 'file';
+        message = i18n.t('drag.dropAnyFile');
+      }
+    } else if (types.includes('text/plain')) {
+      dragType = 'text';
+      message = i18n.t('drag.dropText');
+    } else if (types.includes('text/uri-list')) {
+      dragType = 'url';
+      message = i18n.t('drag.dropUrl');
+    }
+    
+    dropArea.setAttribute('data-drag-type', dragType);
+    dropArea.setAttribute('data-drop-message', message);
+  }
+
+  private handleDragLeave(dropArea: HTMLElement) {
+    dropArea.classList.remove('dragover');
+    dropArea.removeAttribute('data-drag-type');
+    dropArea.removeAttribute('data-drop-message');
+  }
+
+  private handleDrop(e: DragEvent, dropArea: HTMLElement) {
     const dataTransfer = e.dataTransfer;
     if (!dataTransfer) return;
 
@@ -1304,6 +1354,7 @@ class SimpleNotepad {
     const files = Array.from(dataTransfer.files || []);
     if (files.length > 0) {
       this.loadDroppedFile(files[0]);
+      this.showDropSuccess(dropArea);
       return;
     }
 
@@ -1311,6 +1362,7 @@ class SimpleNotepad {
     const textData = dataTransfer.getData('text/plain');
     if (textData) {
       this.handleDroppedText(textData);
+      this.showDropSuccess(dropArea);
       return;
     }
 
@@ -1318,6 +1370,7 @@ class SimpleNotepad {
     const htmlData = dataTransfer.getData('text/html');
     if (htmlData) {
       this.handleDroppedHTML(htmlData);
+      this.showDropSuccess(dropArea);
       return;
     }
 
@@ -1325,11 +1378,102 @@ class SimpleNotepad {
     const urlData = dataTransfer.getData('text/uri-list');
     if (urlData) {
       this.handleDroppedURL(urlData);
+      this.showDropSuccess(dropArea);
       return;
     }
 
     // If no recognized data type, show message
     this.statusText.textContent = i18n.t('status.unsupportedDrop');
+  }
+
+  private showDropSuccess(dropArea: HTMLElement) {
+    dropArea.classList.add('drop-success');
+    setTimeout(() => {
+      dropArea.classList.remove('drop-success');
+    }, 1000);
+  }
+
+  private isTextReadableFile(file: File): boolean {
+    // Check MIME type first
+    if (file.type.startsWith('text/')) {
+      return true;
+    }
+    
+    // Check for known text file extensions (comprehensive list)
+    const textExtensions = [
+      // Common text formats
+      'txt', 'text', 'rtf', 'md', 'markdown', 'rst',
+      
+      // Programming languages
+      'js', 'ts', 'jsx', 'tsx', 'mjs', 'cjs',
+      'py', 'pyw', 'pyx', 'pyi',
+      'java', 'class', 'kt', 'kts',
+      'c', 'cpp', 'cxx', 'cc', 'h', 'hpp', 'hxx',
+      'cs', 'vb', 'fs', 'fsx',
+      'go', 'rs', 'swift', 'm', 'mm',
+      'php', 'rb', 'pl', 'pm', 'r', 'R',
+      'scala', 'clj', 'cljs', 'hs', 'lhs',
+      'lua', 'dart', 'elm', 'nim',
+      
+      // Web technologies
+      'html', 'htm', 'xhtml', 'xml', 'xsl', 'xslt',
+      'css', 'scss', 'sass', 'less', 'styl',
+      'json', 'jsonc', 'json5', 'yaml', 'yml', 'toml',
+      'svg', 'vue', 'svelte', 'astro',
+      
+      // Shell and scripts
+      'sh', 'bash', 'zsh', 'fish', 'ps1', 'bat', 'cmd',
+      'awk', 'sed', 'vim', 'vimrc',
+      
+      // Configuration files
+      'ini', 'conf', 'config', 'cfg', 'properties',
+      'env', 'dotenv', 'editorconfig', 'gitignore',
+      'dockerignore', 'eslintrc', 'prettierrc',
+      'babelrc', 'tsconfig', 'webpack', 'rollup',
+      'package', 'lock', 'manifest',
+      
+      // Documentation
+      'readme', 'changelog', 'license', 'authors',
+      'contributing', 'todo', 'note', 'notes',
+      'doc', 'docs', 'help',
+      
+      // Log and data files
+      'log', 'logs', 'out', 'err', 'trace',
+      'csv', 'tsv', 'psv', 'dsv',
+      'sql', 'db', 'sqlite',
+      
+      // Templates and misc
+      'template', 'tpl', 'mustache', 'hbs',
+      'patch', 'diff', 'rej',
+      'makefile', 'cmake', 'gradle',
+      'pom', 'sbt', 'build',
+      
+      // System files
+      'hosts', 'passwd', 'fstab', 'crontab',
+      'profile', 'bashrc', 'zshrc'
+    ];
+    
+    const fileName = file.name.toLowerCase();
+    const extension = fileName.split('.').pop();
+    
+    // Check if it matches known text extensions
+    if (extension && textExtensions.includes(extension)) {
+      return true;
+    }
+    
+    // Check for files without extensions that are typically text
+    const textFileNames = [
+      'readme', 'license', 'changelog', 'authors', 'contributors',
+      'todo', 'makefile', 'dockerfile', 'gemfile', 'rakefile',
+      'gruntfile', 'gulpfile', 'webpack', 'rollup'
+    ];
+    
+    const baseFileName = fileName.split('.')[0];
+    if (textFileNames.includes(baseFileName)) {
+      return true;
+    }
+    
+    return false;
   }
 
   private handleDroppedText(text: string) {
@@ -1458,23 +1602,75 @@ class SimpleNotepad {
       return;
     }
 
+    // Show loading status
+    this.statusText.textContent = i18n.t('status.loading', { filename: file.name });
+
     const reader = new FileReader();
+    
     reader.onload = (e) => {
-      this.state.content = e.target?.result as string;
-      this.state.filePath = file.name;
-      this.state.modified = false;
-      this.state.undoStack = [this.state.content];
-      this.state.redoStack = [];
-      this.editor.value = this.state.content;
-      
-      this.detectEncoding(file);
-      
-      this.updateDisplay();
-      this.updateLineNumbers();
-      this.updateToolbarState();
-      this.statusText.textContent = `${i18n.t('status.fileOpened')}: "${file.name}" (${this.state.encoding})`;
+      try {
+        let content = e.target?.result as string;
+        
+        // Check if the content appears to be binary
+        if (this.isBinaryContent(content)) {
+          // Ask user if they want to proceed with binary file
+          const proceed = confirm(i18n.t('confirm.binaryFile', { filename: file.name }));
+          if (!proceed) {
+            this.statusText.textContent = i18n.t('status.loadCancelled');
+            return;
+          }
+          // Show warning about binary content
+          this.statusText.textContent = i18n.t('status.binaryFileLoaded', { filename: file.name });
+        } else {
+          this.statusText.textContent = `${i18n.t('status.fileOpened')}: "${file.name}" (${this.state.encoding})`;
+        }
+        
+        this.state.content = content;
+        this.state.filePath = file.name;
+        this.state.modified = false;
+        this.state.undoStack = [this.state.content];
+        this.state.redoStack = [];
+        this.editor.value = this.state.content;
+        
+        this.detectEncoding(file);
+        
+        this.updateDisplay();
+        this.updateLineNumbers();
+        this.updateToolbarState();
+      } catch (error) {
+        this.statusText.textContent = i18n.t('error.fileRead') + `: ${file.name}`;
+        console.error('Error loading file:', error);
+      }
     };
-    reader.readAsText(file, this.state.encoding);
+    
+    reader.onerror = () => {
+      this.statusText.textContent = i18n.t('error.fileRead') + `: ${file.name}`;
+    };
+    
+    // Always try to read as text first, with UTF-8 encoding
+    reader.readAsText(file, 'UTF-8');
+  }
+
+  private isBinaryContent(content: string): boolean {
+    // Check for null bytes (common in binary files)
+    if (content.includes('\x00')) {
+      return true;
+    }
+    
+    // Check for high ratio of non-printable characters
+    let nonPrintableCount = 0;
+    const sampleSize = Math.min(1024, content.length); // Check first 1KB
+    
+    for (let i = 0; i < sampleSize; i++) {
+      const charCode = content.charCodeAt(i);
+      // Consider characters outside printable ASCII range (except common whitespace)
+      if (charCode < 9 || (charCode > 13 && charCode < 32) || charCode === 127) {
+        nonPrintableCount++;
+      }
+    }
+    
+    // If more than 30% non-printable characters, likely binary
+    return (nonPrintableCount / sampleSize) > 0.3;
   }
 
   private initializeUpdateChecker() {

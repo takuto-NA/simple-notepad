@@ -129,5 +129,21 @@ export default {
   'status.noTextInHTML': 'No text content found in HTML',
   
   // Additional confirmations
-  'confirm.replaceContent': 'This will replace all current content. Continue?'
+  'confirm.replaceContent': 'This will replace all current content. Continue?',
+  
+  // Drag and drop messages
+  'drag.dropFile': '📁 Drop file to open',
+  'drag.dropTextFile': '📄 Drop text file to open',
+  'drag.dropAnyFile': '📄 Drop any file to read as text',
+  'drag.dropText': '📝 Drop text to insert',
+  'drag.dropUrl': '🔗 Drop URL to insert',
+  'drag.dropImage': '🖼️ Drop image to extract text',
+  
+  // File loading status
+  'status.loading': 'Loading {filename}...',
+  'status.loadCancelled': 'File loading cancelled',
+  'status.binaryFileLoaded': 'Binary file loaded: {filename} (may contain unreadable characters)',
+  
+  // Binary file confirmation
+  'confirm.binaryFile': 'The file "{filename}" appears to contain binary data. It may not display correctly as text. Continue anyway?'
 }; 
